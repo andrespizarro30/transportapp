@@ -14,6 +14,7 @@ import 'package:transport_app/view/menu/summary_view.dart';
 import 'package:transport_app/view/menu/wallet_view.dart';
 import 'package:transport_app/view/user/users_my_rides_view.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/globs.dart';
 
 class MenuView extends StatefulWidget {
@@ -75,7 +76,11 @@ class _MenuViewState extends State<MenuView> {
                             title: "Earnings",
                             icon: "./assets/images/earnings.png",
                             onPress: (){
-                              context.push(const EarningView());
+                              if(ServiceCall.userType == 1){
+                                context.push(const UserMyRidesView());
+                              }else{
+                                context.push(const DriverMyRidesView());
+                              }
                             }
                         ),
                         InkWell(
@@ -196,14 +201,14 @@ class _MenuViewState extends State<MenuView> {
                     MenuRow(title: "Home", icon: "./assets/images/home.png", onPress: (){
                 
                     }),
-                    MenuRow(title: "My Rides", icon: "./assets/images/summary.png", onPress: (){
+                    MenuRow(title: AppLocalizations.of(context).translate('my_rides'), icon: "./assets/images/summary.png", onPress: (){
                       if(ServiceCall.userType == 1){
                         context.push(const UserMyRidesView());
                       }else{
                         context.push(const DriverMyRidesView());
                       }
                     }),
-                    MenuRow(title: "Summary", icon: "./assets/images/summary.png", onPress: (){
+                    MenuRow(title: AppLocalizations.of(context).translate('summary'), icon: "./assets/images/summary.png", onPress: (){
                       context.push(const SummaryView());
                     }),
                     MenuRow(title: "My Subscription", icon: "./assets/images/my_subscription.png", onPress: (){

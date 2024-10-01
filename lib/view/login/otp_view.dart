@@ -8,7 +8,7 @@ import "package:transport_app/common/common_extension.dart";
 import "package:transport_app/common/globs.dart";
 import "package:transport_app/common/service_call.dart";
 import "package:transport_app/common_widget/round_button.dart";
-import "package:transport_app/cubit/login_cubit.dart";
+import "package:transport_app/cubit/login/login_cubit.dart";
 import "package:transport_app/view/home/home_view.dart";
 import "package:transport_app/view/login/profile_image_view.dart";
 import "package:transport_app/view/user/user_home_view.dart";

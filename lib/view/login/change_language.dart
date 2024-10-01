@@ -3,7 +3,10 @@ import 'package:transport_app/common/color_extension.dart';
 import 'package:transport_app/view/login/welcome_view.dart';
 
 class ChangeLanguageView extends StatefulWidget {
-  const ChangeLanguageView({super.key});
+
+  final Function(String languageCode) changeLanguage;
+
+  const ChangeLanguageView({super.key, required this.changeLanguage});
 
   @override
   State<ChangeLanguageView> createState() => _ChangeLanguageViewState();
@@ -54,6 +57,14 @@ class _ChangeLanguageViewState extends State<ChangeLanguageView> {
                 itemBuilder: (context,index){
                   return ListTile(
                     onTap: (){
+
+                      if(index==0){
+                        widget.changeLanguage("es");
+                      }else
+                      if(index==1){
+                        widget.changeLanguage("en");
+                      }
+
                       setState(() {
                         selectChange = index;
                       });

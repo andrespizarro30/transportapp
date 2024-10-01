@@ -1,7 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_app/common/common_extension.dart';
 import 'package:transport_app/view/home/run_ride_view.dart';
 
@@ -9,6 +15,8 @@ import '../../common/color_extension.dart';
 import '../../common/globs.dart';
 import '../../common/service_call.dart';
 import '../../common/socket_manager.dart';
+import '../../cubit/map_requests/map_requests_cubit.dart';
+import '../../model/directions_model.dart';
 
 class TipRequestView extends StatefulWidget {
 
@@ -20,7 +28,18 @@ class TipRequestView extends StatefulWidget {
   State<TipRequestView> createState() => _TipRequestViewState();
 }
 
-class _TipRequestViewState extends State<TipRequestView> with OSMMixinObserver {
+class _TipRequestViewState extends State<TipRequestView>{
+
+  Position? position = null;
+  Completer<GoogleMapController> _controllerGoogleMap = Completer();
+  GoogleMapController? newGoogleMapController;
+  final initialCameraPosition =
+  const CameraPosition(target: LatLng(4.8, -75.7), zoom: 15.0);
+  double bottomPaddingOfMap = 0;
+  List<LatLng> pLineCoordinates = [];
+  Set<Polyline> polylineSet = {};
+  Set<Marker> markersSet = {};
+  Set<Circle> circlesSet = {};
 
   bool isOpen = true;
 
@@ -29,16 +48,6 @@ class _TipRequestViewState extends State<TipRequestView> with OSMMixinObserver {
   @override
   void initState() {
     super.initState();
-
-    controller = MapController(
-      initPosition: GeoPoint(
-          latitude: double.tryParse(widget.bObj["pickup_lat"].toString()) ?? 0.0,
-          longitude: double.tryParse(widget.bObj["pickup_long"].toString()) ?? 0.0
-      ),
-    );
-
-    controller.addObserver(this);
-
   }
 
   @override
@@ -50,111 +59,71 @@ class _TipRequestViewState extends State<TipRequestView> with OSMMixinObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          OSMFlutter(
-              controller:controller,
-              osmOption: OSMOption(
-                enableRotationByGesture: true,
-                zoomOption: const ZoomOption(
-                  initZoom: 8,
-                  minZoomLevel: 3,
-                  maxZoomLevel: 19,
-                  stepZoom: 1.0,
-                ),
-                staticPoints: [
+      body: BlocConsumer<MapRequestsCubit, MapRequestsState>(
+        listener: (context, state) {
+          if(state is MapRequestsDirectionsSuccess){
+            drawRoad(state.routes);
+          }
+        },
+        builder: (context, state) {
+          return Stack(
+              children: [
+                GoogleMap(
+                  padding: EdgeInsets.only(bottom: bottomPaddingOfMap),
+                  mapType: MapType.normal,
+                  myLocationButtonEnabled: true,
+                  myLocationEnabled: true,
+                  zoomGesturesEnabled: true,
+                  zoomControlsEnabled: true,
+                  polylines: polylineSet,
+                  markers: markersSet,
+                  circles: circlesSet,
+                  initialCameraPosition: initialCameraPosition,
+                  onMapCreated: (GoogleMapController controller) {
+                    _controllerGoogleMap.complete(controller);
+                    newGoogleMapController = controller;
 
-                ],
-                roadConfiguration: const RoadOption(
-                  roadColor: Colors.blueAccent,
+                    loadMapRoad();
+
+                    setState(() {
+                      bottomPaddingOfMap = 265.0;
+                    });
+                  },
                 ),
-                markerOption: MarkerOption(
-                    defaultMarker: const  MarkerIcon(
-                      icon: Icon(
-                        Icons.person_pin_circle,
-                        color: Colors.blue,
-                        size: 56,
-                      ),
-                    )
-                ),
-                showDefaultInfoWindow: false
-              ),
-              onMapIsReady: (isReady){
-                if(isReady){
-                  print("Map is ready");
-                }
-              },
-              onLocationChanged: (myLocation){
-                print("User location: $myLocation");
-              },
-              onGeoPointClicked: (location){
-                print("Clicked location: $location");
-              },
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        topRight: Radius.circular(10)
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 10,
-                          offset: Offset(0, -5)
-                      )
-                    ]
-                ),
-                child: Column(
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text(
-                      "${widget.bObj["est_duration"] ?? ""} min",
-                      style: TextStyle(
-                          color: TColor.primaryText,
-                          fontSize: 25,
-                          fontWeight: FontWeight.w800
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              topRight: Radius.circular(10)
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 10,
+                                offset: Offset(0, -5)
+                            )
+                          ]
                       ),
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            "${widget.bObj["est_total_distance"] ?? ""} KM",
-                            textAlign: TextAlign.center,
+                      child: Column(
+                        children: [
+                          Text(
+                            "${widget.bObj["est_duration"] ?? ""} min",
                             style: TextStyle(
-                                color: TColor.secondaryText,
-                                fontSize: 18,
+                                color: TColor.primaryText,
+                                fontSize: 25,
                                 fontWeight: FontWeight.w800
                             ),
                           ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            "\$${widget.bObj["amt"] ?? ""}",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: TColor.secondaryText,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.star_half_outlined,size: 20,),
-                                const SizedBox(width: 4,),
-                                Text(
-                                  "5",
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  "${widget.bObj["est_total_distance"] ?? ""} KM",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       color: TColor.secondaryText,
@@ -162,232 +131,307 @@ class _TipRequestViewState extends State<TipRequestView> with OSMMixinObserver {
                                       fontWeight: FontWeight.w800
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    SizedBox(height: 15),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              color: TColor.secondary,
-                              borderRadius: BorderRadius.circular(10)
-                            ),
-                          ),
-                          SizedBox(width: 15),
-                          Expanded(
-                            child: Text(
-                              "${widget.bObj["pickup_address"] ?? ""}",
-                              style: TextStyle(
-                                  color: TColor.secondaryText,
-                                  fontSize: 15
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                                color: TColor.primary
-                            ),
-                          ),
-                          SizedBox(width: 15),
-                          Expanded(
-                            child: Text(
-                              "${widget.bObj["drop_address"] ?? ""}",
-                              style: TextStyle(
-                                  color: TColor.secondaryText,
-                                  fontSize: 15
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 15,),
-
-                    InkWell(
-                      onTap: (){
-                        apiAcceptRide();
-                      },
-                      child: Container(
-                        width: double.maxFinite,
-                        padding: const EdgeInsets.all(6),
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        decoration: BoxDecoration(
-                            color: TColor.primary,
-                            borderRadius: BorderRadius.circular(25)
-                        ),
-                        child: Stack(
-                          alignment: Alignment.centerRight,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "ACEPTAR",
+                              Expanded(
+                                child: Text(
+                                  "\$${widget.bObj["amt"] ?? ""}",
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      color: TColor.primaryTextW,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700
+                                      color: TColor.secondaryText,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w800
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 8),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.star_half_outlined,size: 20,),
+                                      const SizedBox(width: 4,),
+                                      Text(
+                                        "5",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: TColor.secondaryText,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w800
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                          SizedBox(height: 15),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                    color: TColor.secondary,
+                                    borderRadius: BorderRadius.circular(10)
+                                  ),
+                                ),
+                                SizedBox(width: 15),
+                                Expanded(
+                                  child: Text(
+                                    "${widget.bObj["pickup_address"] ?? ""}",
+                                    style: TextStyle(
+                                        color: TColor.secondaryText,
+                                        fontSize: 15
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            Container(
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.black12,
-                                borderRadius: BorderRadius.circular(20)
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                "15",
-                                style: TextStyle(
-                                    color: TColor.primaryTextW,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                      color: TColor.primary
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 25,)
-                  ],
-                ),
-
-              )
-            ],
-          ),
-          SafeArea(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children:[
-                        InkWell(
-                          onTap: (){
-                            apiDeclineRide();
-                          },
-                          child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 25),
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(30),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.black26,
-                                        blurRadius: 10
-                                    )
-                                  ]
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.close,size: 25,),
-                                  SizedBox(width: 8,),
-                                  Text(
-                                    "No gracias",
+                                SizedBox(width: 15),
+                                Expanded(
+                                  child: Text(
+                                    "${widget.bObj["drop_address"] ?? ""}",
                                     style: TextStyle(
-                                        color: TColor.primaryText,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w800
+                                        color: TColor.secondaryText,
+                                        fontSize: 15
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 15,),
+
+                          InkWell(
+                            onTap: (){
+                              apiAcceptRide();
+                            },
+                            child: Container(
+                              width: double.maxFinite,
+                              padding: const EdgeInsets.all(6),
+                              margin: const EdgeInsets.symmetric(horizontal: 20),
+                              decoration: BoxDecoration(
+                                  color: TColor.primary,
+                                  borderRadius: BorderRadius.circular(25)
+                              ),
+                              child: Stack(
+                                alignment: Alignment.centerRight,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "ACEPTAR",
+                                        style: TextStyle(
+                                            color: TColor.primaryTextW,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black12,
+                                      borderRadius: BorderRadius.circular(20)
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      "15",
+                                      style: TextStyle(
+                                          color: TColor.primaryTextW,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700
+                                      ),
                                     ),
                                   ),
                                 ],
-                              )
+                              ),
+                            ),
                           ),
-                        ),
 
+                          const SizedBox(height: 25,)
+                        ],
+                      ),
+
+                    )
+                  ],
+                ),
+                SafeArea(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(15),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children:[
+                              InkWell(
+                                onTap: (){
+                                  apiDeclineRide();
+                                },
+                                child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 25),
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(30),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: Colors.black26,
+                                              blurRadius: 10
+                                          )
+                                        ]
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.close,size: 25,),
+                                        SizedBox(width: 8,),
+                                        Text(
+                                          "No gracias",
+                                          style: TextStyle(
+                                              color: TColor.primaryText,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w800
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                ),
+                              ),
+
+                            ],
+                          ),
+                        )
                       ],
-                    ),
-                  )
-                ],
-              )
-          )
-        ],
+                    )
+                )
+              ],
+            );
+        },
       ),
     );
   }
 
-  void addMarker() async{
+  void setMarkers(LatLng origPos, LatLng destPos) {
+    Marker origLocationMarker = Marker(
+        markerId: MarkerId("pickUpMarker"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+        infoWindow: InfoWindow(
+          //title: address!.placeName,
+            snippet: "Partida"),
+        position: origPos);
 
-    await controller.setMarkerOfStaticPoint(
-        id: "pickup",
-        markerIcon: MarkerIcon(
-          iconWidget: Icon(Icons.location_history_rounded,size: 40,color: TColor.primary)
-        )
-    );
+    Marker destLocationMarker = Marker(
+        markerId: MarkerId("destinyMarker"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        infoWindow: InfoWindow(
+          //title: result!.name!,
+            snippet: "Llegada"),
+        position: destPos);
 
-    await controller.setMarkerOfStaticPoint(
-        id: "dropoff",
-        markerIcon: MarkerIcon(
-            iconWidget: Icon(Icons.car_crash,size: 40,color: TColor.secondary)
-        )
-    );
+    markersSet.clear();
 
-    await controller.setStaticPosition(
-      [
-        GeoPoint(
-          latitude: double.tryParse(widget.bObj["pickup_lat"].toString()) ?? 0.0,
-          longitude: double.tryParse(widget.bObj["pickup_long"].toString()) ?? 0.0
-        )
-      ], "pickup");
+    setState(() {
+      markersSet.add(origLocationMarker);
+      markersSet.add(destLocationMarker);
+    });
+  }
 
-    await controller.setStaticPosition(
-        [
-          GeoPoint(
-            latitude: double.tryParse(widget.bObj["drop_lat"].toString()) ?? 0.0,
-            longitude: double.tryParse(widget.bObj["drop_long"].toString()) ?? 0.0
-          )
-        ], "dropoff");
+  LatLng origPos = LatLng(0, 0);
+  LatLng destPos = LatLng(0, 0);
 
-    loadMapRoad();
-
+  void getDirection() async {
+    context.read<MapRequestsCubit>().getDirections(origPos, destPos, context);
   }
 
   void loadMapRoad()async{
-    await controller.drawRoad(
-        GeoPoint(
-            latitude: double.tryParse(widget.bObj["pickup_lat"].toString()) ?? 0.0,
-            longitude: double.tryParse(widget.bObj["pickup_long"].toString()) ?? 0.0
-        ),
-        GeoPoint(
-            latitude: double.tryParse(widget.bObj["drop_lat"].toString()) ?? 0.0,
-            longitude: double.tryParse(widget.bObj["drop_long"].toString()) ?? 0.0
-        ),
-        roadType: RoadType.car,
-        roadOption: const RoadOption(roadColor: Colors.blueAccent,roadBorderWidth: 5)
-    );
+    origPos = LatLng(double.tryParse(widget.bObj["pickup_lat"].toString()) ?? 0.0,
+        double.tryParse(widget.bObj["pickup_long"].toString()) ?? 0.0);
+    destPos = LatLng(double.tryParse(widget.bObj["drop_lat"].toString()) ?? 0.0,
+        double.tryParse(widget.bObj["drop_long"].toString()) ?? 0.0);
+
+    getDirection();
   }
 
-  @override
-  Future<void> mapIsReady(bool isReady) async{
-    if(isReady){
-      addMarker();
+  void drawRoad(List<Routes> res) {
+    print("DIRECTIONS");
+    print(res![0].overviewPolyline!.toJson().toString());
+
+    PolylinePoints polylinePoints = PolylinePoints();
+    List<PointLatLng> decodePolylinePointsResult =
+    polylinePoints.decodePolyline(res![0].overviewPolyline!.points!);
+
+    pLineCoordinates.clear();
+
+    if (decodePolylinePointsResult.isNotEmpty) {
+      decodePolylinePointsResult.forEach((PointLatLng pointLatLng) {
+        pLineCoordinates
+            .add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
+      });
     }
+
+    polylineSet.clear();
+
+    setState(() {
+      Polyline polyline = Polyline(
+          polylineId: PolylineId("polylineId"),
+          color: Colors.blueAccent,
+          jointType: JointType.round,
+          points: pLineCoordinates,
+          width: 5,
+          startCap: Cap.roundCap,
+          endCap: Cap.squareCap,
+          geodesic: true);
+
+      polylineSet.add(polyline);
+    });
+
+    setMarkers(origPos, destPos);
+
+    boundMap();
+  }
+
+  void boundMap() async {
+    LatLngBounds latLngBounds;
+
+    if (origPos.latitude > destPos.latitude &&
+        origPos.longitude > destPos.longitude) {
+      latLngBounds = LatLngBounds(southwest: destPos, northeast: origPos);
+    } else if (origPos.longitude > destPos.longitude) {
+      latLngBounds = LatLngBounds(
+          southwest: LatLng(origPos.latitude, destPos.longitude),
+          northeast: LatLng(destPos.latitude, origPos.longitude));
+    } else if (origPos.latitude > destPos.latitude) {
+      latLngBounds = LatLngBounds(
+          southwest: LatLng(destPos.latitude, origPos.longitude),
+          northeast: LatLng(origPos.latitude, destPos.longitude));
+    } else {
+      latLngBounds = LatLngBounds(southwest: origPos, northeast: destPos);
+    }
+
+    newGoogleMapController
+        ?.animateCamera(CameraUpdate.newLatLngBounds(latLngBounds, 70));
   }
 
   void apiAcceptRide(){

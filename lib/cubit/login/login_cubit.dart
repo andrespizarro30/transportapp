@@ -7,7 +7,7 @@ import 'package:transport_app/common/globs.dart';
 
 import 'package:transport_app/common/common_extension.dart';
 
-import '../common/service_call.dart';
+import '../../common/service_call.dart';
 
 part 'login_state.dart';
 

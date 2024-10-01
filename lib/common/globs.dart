@@ -79,7 +79,7 @@ class Globs{
 }
 
 class SVKey{
-  static const mainUrl = "http://192.168.10.11:3001";
+  static const mainUrl = "http://192.168.10.12:3001";
   //static const mainUrl = "http://localhost:3001";
   //static const mainUrl = "https://transport-app-gkccfyhrgua4ezg7.eastus-01.azurewebsites.net";
   static const baseUrl = "$mainUrl/api/";

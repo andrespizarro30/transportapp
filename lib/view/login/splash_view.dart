@@ -11,7 +11,10 @@ import 'package:transport_app/view/user/user_home_view.dart';
 import '../../common/service_call.dart';
 
 class SplashView extends StatefulWidget {
-  const SplashView({super.key});
+
+  final Function(String languageCode) changeLanguage;
+
+  const SplashView({super.key, required this.changeLanguage});
 
   @override
   State<SplashView> createState() => _SplashViewState();
@@ -46,7 +49,7 @@ class _SplashViewState extends State<SplashView> {
       }
 
     }else{
-      context.push(const ChangeLanguageView());
+      context.push(ChangeLanguageView(changeLanguage: widget.changeLanguage));
     }
   }
 

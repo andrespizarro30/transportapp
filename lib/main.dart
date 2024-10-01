@@ -10,11 +10,16 @@ import 'package:transport_app/common/color_extension.dart';
 import 'package:transport_app/common/dbhelpers.dart';
 import 'package:transport_app/common/my_http_override.dart';
 import 'package:transport_app/common/socket_manager.dart';
-import 'package:transport_app/cubit/login_cubit.dart';
+import 'package:transport_app/cubit/login/login_cubit.dart';
 import 'package:transport_app/view/login/splash_view.dart';
 
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+import 'common/appLocalizations .dart';
 import 'common/globs.dart';
 import 'common/service_call.dart';
+import 'cubit/geolocation/geolocation_bloc.dart';
+import 'cubit/map_requests/map_requests_cubit.dart';
 
 SharedPreferences? prefs;
 
@@ -36,7 +41,9 @@ void main() async{
 
   requestStoragePermission();
 
-  runApp(const MyApp());
+  final String? locale = await getSavedLocale();
+  runApp(MyApp(locale: locale ?? 'en'));
+
   configLoading();
   ServiceCall.getStaticDateApi();
 }
@@ -75,16 +82,64 @@ void configLoading() {
     ..dismissOnTap = false;
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
 
-  // This widget is the root of your application.
+  final String locale;
+
+  const MyApp({super.key, required this.locale});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+  Locale _locale = Locale('en');
+
+  @override
+  void initState() {
+    super.initState();
+    _locale = Locale(widget.locale); // Set the locale to saved or default language
+  }
+
+  void _changeLanguage(String languageCode) async {
+    setState(() {
+      _locale = Locale(languageCode);
+    });
+    await saveLocale(languageCode); // Save selected language
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return MultiBlocProvider(
-        providers: [BlocProvider(create: (context)=>LoginCubit())],
+        providers: [
+          BlocProvider(create: (context)=>LoginCubit()),
+          BlocProvider(create: (context)=>MapRequestsCubit()),
+          BlocProvider(create: (context)=>GeolocationBloc()),
+        ],
         child: MaterialApp(
           title: 'Flutter Demo',
+          locale: _locale,
+          supportedLocales: [
+            Locale('en', ''),
+            Locale('es', ''),
+          ],
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            AppLocalizationsDelegate(),
+          ],
+          localeResolutionCallback: (locale, supportedLocales) {
+            // Check if the current locale is supported
+            for (var supportedLocale in supportedLocales) {
+              if (supportedLocale.languageCode == locale?.languageCode) {
+                return supportedLocale;
+              }
+            }
+            return supportedLocales.first;
+          },
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             fontFamily: "NunitoSans",
@@ -96,9 +151,38 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: TColor.primary),
             useMaterial3: false,
           ),
-          home: const SplashView(),
+          home: SplashView(changeLanguage: _changeLanguage),
           builder: EasyLoading.init(),
         )
     );
   }
+}
+
+Future<String?> getSavedLocale() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('locale');
+}
+
+Future<void> saveLocale(String locale) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString('locale', locale);
+}
+
+class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+  const AppLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) {
+    return ['en', 'es'].contains(locale.languageCode);
+  }
+
+  @override
+  Future<AppLocalizations> load(Locale locale) async {
+    var localizations = AppLocalizations(locale.languageCode);
+    await localizations.load();
+    return localizations;
+  }
+
+  @override
+  bool shouldReload(LocalizationsDelegate<AppLocalizations> old) => false;
 }

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:transport_app/common/common_extension.dart';
 import 'package:transport_app/common/globs.dart';
 import 'package:transport_app/common/service_call.dart';
@@ -31,6 +32,7 @@ class LocationHelper {
   String saveFilePath = "";
 
   void startInit() async{
+
     var isAccess = await handlerPermissions();
 
     if(!isAccess){
@@ -122,7 +124,9 @@ class LocationHelper {
         positionStreamSub?.cancel();
         positionStreamSub = null;
       }).listen((position){
+
         lastLocation = position;
+
         if(isSaveFileLocation && bookingId !=0) {
           try {
             File("$saveFilePath/$bookingId.txt")
@@ -207,7 +211,6 @@ class LocationHelper {
 
   String getRideSaveLocationJsonString(int bookingId){
     try{
-
       return "[${File("$saveFilePath/$bookingId.txt").readAsStringSync()}]";
     }catch(e){
       debugPrint(e.toString());
