@@ -4,12 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_app/common/common_extension.dart';
-import 'package:transport_app/view/home/run_ride_view.dart';
 
 import '../../common/color_extension.dart';
 import '../../common/globs.dart';
@@ -28,7 +27,7 @@ class TipRequestView extends StatefulWidget {
   State<TipRequestView> createState() => _TipRequestViewState();
 }
 
-class _TipRequestViewState extends State<TipRequestView>{
+class _TipRequestViewState extends State<TipRequestView> with SingleTickerProviderStateMixin {
 
   Position? position = null;
   Completer<GoogleMapController> _controllerGoogleMap = Completer();
@@ -43,17 +42,59 @@ class _TipRequestViewState extends State<TipRequestView>{
 
   bool isOpen = true;
 
-  late MapController controller;
+  late Timer timer;
+  int time_left_to_accept = 15;
+
+  late AnimationController colorController;
+  late Animation<Color?> colorAnimation;
+
+
 
   @override
   void initState() {
     super.initState();
+
+    SocketManager.shared.socket?.on("user_cancel_ride", (data) async{
+      print("user_cancel_ride socket get : ${data.toString()}");
+      if(data[KKey.status] == "1"){
+        if(data[KKey.payload]["booking_id"] == widget.bObj["booking_id"]){
+          context.pop();
+        }
+      }
+    });
+
+    const Duration interval = Duration(seconds: 1);
+
+    timer = Timer.periodic(interval, (Timer timer) {
+      setState(() {
+        time_left_to_accept -= 1;
+      });
+
+      if(time_left_to_accept == 0){
+        apiDeclineRide();
+      }
+
+    });
+
+    colorController = AnimationController(
+      duration: Duration(seconds: 15), // Duration of the animation
+      vsync: this,
+    );
+
+    colorAnimation = ColorTween(begin: Colors.green, end: Colors.red).animate(colorController)
+      ..addListener(() {
+        setState(() {});
+      });
+
+    colorController.forward();
+
   }
 
   @override
   void dispose() {
+    timer.cancel();
+    colorController.dispose();
     super.dispose();
-    controller.dispose();
   }
 
   @override
@@ -228,8 +269,17 @@ class _TipRequestViewState extends State<TipRequestView>{
                               padding: const EdgeInsets.all(6),
                               margin: const EdgeInsets.symmetric(horizontal: 20),
                               decoration: BoxDecoration(
-                                  color: TColor.primary,
-                                  borderRadius: BorderRadius.circular(25)
+                                  color: colorAnimation.value,
+                                  borderRadius: BorderRadius.circular(25),
+                                  // gradient: LinearGradient(
+                                  //   begin: Alignment.centerRight,
+                                  //   end: Alignment.centerLeft,
+                                  //   stops: [0.0, colorAnimation.value], // Dynamic stop for the color change
+                                  //   colors: [
+                                  //     TColor.primary,
+                                  //     Colors.red,
+                                  //   ],
+                                  // ),
                               ),
                               child: Stack(
                                 alignment: Alignment.centerRight,
@@ -256,7 +306,7 @@ class _TipRequestViewState extends State<TipRequestView>{
                                     ),
                                     alignment: Alignment.center,
                                     child: Text(
-                                      "15",
+                                      time_left_to_accept.toString(),
                                       style: TextStyle(
                                           color: TColor.primaryTextW,
                                           fontSize: 14,

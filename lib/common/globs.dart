@@ -79,7 +79,7 @@ class Globs{
 }
 
 class SVKey{
-  static const mainUrl = "http://192.168.10.12:3001";
+  static const mainUrl = "http://192.168.10.19:3001";
   //static const mainUrl = "http://localhost:3001";
   //static const mainUrl = "https://transport-app-gkccfyhrgua4ezg7.eastus-01.azurewebsites.net";
   static const baseUrl = "$mainUrl/api/";
@@ -89,6 +89,8 @@ class SVKey{
   static const svProfileImageUpload = "${baseUrl}profile_image";
   static const svServiceAndZoneList = "${baseUrl}service_and_zone_list";
   static const svProfileUpdate = "${baseUrl}profile_update";
+
+  static const svUpdatePushToken = "${baseUrl}updatepushtoken";
 
   static const svBankDetail = "${baseUrl}bank_detail";
   static const svDriverBankDetailUpdate = "${baseUrl}driver_bank_update";
@@ -122,6 +124,7 @@ class SVKey{
   static const svRideStop = "${baseUrl}ride_stop";
   static const svRideCancel = "${baseUrl}driver_cancel_ride";
   static const svUserRideCancel = "${baseUrl}user_cancel_ride";
+  static const svUserRideCancelForce = "${baseUrl}user_cancel_ride_force";
 
   static const svUserAllRides = "${baseUrl}user_all_ride_list";
   static const svDriverAllRides = "${baseUrl}driver_all_ride_list";
@@ -130,6 +133,8 @@ class SVKey{
   static const svBookingDetail = "${baseUrl}booking_detail";
 
   static const svDriverSummary = "${baseUrl}driver_summary";
+  static const svDriverSummaryDaily = "${baseUrl}driver_summary_daily_amount";
+  static const svDriverRatings = "${baseUrl}driver_rating";
 
   static const svPersonalDocumentList = "${baseUrl}personal_document_list";
   static const svDriverUpdateDocument = "${baseUrl}driver_update_document";

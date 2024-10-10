@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,6 +29,8 @@ import '../../cubit/geolocation/geolocation_bloc.dart';
 import '../../cubit/geolocation/geolocation_event.dart';
 import '../../cubit/geolocation/geolocation_state.dart';
 import '../../cubit/map_requests/map_requests_cubit.dart';
+import '../../firebase/push_notification.dart';
+import '../../model/current_drivers_model.dart';
 import '../../model/directions_model.dart';
 
 class UserHomeView extends StatefulWidget {
@@ -71,17 +75,76 @@ class _UserHomeViewState extends State<UserHomeView> {
   double estTimeInMin = 0.0;
   double estDistInKm = 0.0;
 
+  List<CurrentDriversModel> currentDrivers = [];
+  BitmapDescriptor? activeNearbyIcon;
+
+  bool isRequestingService = false;
+  Map requestData = {};
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
     changeLocation();
+
+    initNotificationService();
 
     SocketManager.shared.socket?.on("user_request_accept", (data) {
       if (data[KKey.status] == "1") {
         apiHome();
       }
+      isRequestingService = false;
+      setState(() {});
     });
+
+    SocketManager.shared.socket?.on("driver_not_available", (data) {
+      if (data[KKey.status] == "1") {
+        var pObj = data[KKey.payload];
+        if(pObj["booking_status"] == 7){
+          mdShowAlert(Globs.appName, data[KKey.message] as String? ?? MSG.fail, () {});
+        }
+      }
+      isRequestingService = false;
+      setState(() {});
+    });
+
+    SocketManager.shared.socket?.on("drivers_location", (data) {
+      if (data[KKey.status] == "1") {
+        var pObj = data[KKey.payload];
+        int userId = pObj["user_id"] ?? 0;
+        double latitude = pObj["latitude"]==0 ? 0.0 : pObj["latitude"] ?? 0.0;
+        double longitude = pObj["longitude"]==0 ? 0.0 : pObj["longitude"] ?? 0.0;
+
+        CurrentDriversModel driverLocation = CurrentDriversModel(user_id: userId,latitude: latitude, longitude: longitude,bearing: 0.0);
+
+        int index = currentDrivers.indexWhere((element) => element.user_id == userId);
+
+        if(index>=0){
+
+          LatLng lastDriverPosition = LatLng(currentDrivers[index].latitude!, currentDrivers[index].longitude!);
+
+          currentDrivers[index].latitude = latitude;
+          currentDrivers[index].longitude = longitude;
+
+          LatLng currentDriverPosition = LatLng(latitude, longitude);
+
+          double bearing = 0.0;
+          if(lastDriverPosition != currentDriverPosition){
+            bearing = getBearing(lastDriverPosition, currentDriverPosition);
+          }
+
+          currentDrivers[index].bearing = bearing;
+
+        }else{
+          currentDrivers.add(driverLocation);
+        }
+
+        displayActiveDriverOnUserMap();
+
+      }
+    });
+
   }
 
   @override
@@ -96,6 +159,14 @@ class _UserHomeViewState extends State<UserHomeView> {
 
   void getCurrentPositionAddress() {
     getSelectLocation();
+  }
+
+  void setCurrentLocationInCamera(){
+    LatLng latLng = LatLng(position!.latitude, position!.longitude);
+    CameraPosition cameraPosition = new CameraPosition(target: latLng, zoom: 16);
+    if (newGoogleMapController != null) {
+      newGoogleMapController?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    }
   }
 
   void getSelectLocation() async {
@@ -188,6 +259,9 @@ class _UserHomeViewState extends State<UserHomeView> {
 
   @override
   Widget build(BuildContext context) {
+
+    createActiveNearByDriverIconMarker();
+
     return Scaffold(
       body: BlocBuilder<GeolocationBloc, GeolocationState>(
           builder: (context, state) {
@@ -261,7 +335,7 @@ class _UserHomeViewState extends State<UserHomeView> {
                             InkWell(
                               borderRadius: BorderRadius.circular(35),
                               onTap: () {
-
+                                setCurrentLocationInCamera();
                               },
                               child: Container(
                                 width: 50,
@@ -284,7 +358,8 @@ class _UserHomeViewState extends State<UserHomeView> {
                       const SizedBox(
                         height: 15,
                       ),
-                      Container(
+                      if(!isRequestingService)
+                        Container(
                         padding: const EdgeInsets.symmetric(
                             vertical: 15, horizontal: 20),
                         decoration: const BoxDecoration(
@@ -339,7 +414,170 @@ class _UserHomeViewState extends State<UserHomeView> {
                             ),
                           ],
                         ),
-                      )
+                      ),
+                      if(isRequestingService)
+                        Container(
+                          height: MediaQuery.of(context).size.height * 0.5,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 20),
+                          decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(10),
+                                  topRight: Radius.circular(10)),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 10,
+                                    offset: Offset(0, -5))
+                              ]),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(vertical: 15),
+                                decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(10),
+                                        topRight: Radius.circular(10)
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.black12,
+                                          blurRadius: 10,
+                                          offset: Offset(0, -5)
+                                      )
+                                    ]
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      "${requestData["est_duration"] ?? ""} min",
+                                      style: TextStyle(
+                                          color: TColor.primaryText,
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w800
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            "${requestData["est_total_distance"] ?? ""} KM",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: TColor.secondaryText,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w800
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            "\$${requestData["amt"] ?? ""}",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: TColor.secondaryText,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w800
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 15),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            decoration: BoxDecoration(
+                                                color: TColor.secondary,
+                                                borderRadius: BorderRadius.circular(10)
+                                            ),
+                                          ),
+                                          SizedBox(width: 15),
+                                          Expanded(
+                                            child: Text(
+                                              "${requestData["pickup_address"] ?? ""}",
+                                              style: TextStyle(
+                                                  color: TColor.secondaryText,
+                                                  fontSize: 15
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            decoration: BoxDecoration(
+                                                color: TColor.primary
+                                            ),
+                                          ),
+                                          SizedBox(width: 15),
+                                          Expanded(
+                                            child: Text(
+                                              "${requestData["drop_address"] ?? ""}",
+                                              style: TextStyle(
+                                                  color: TColor.secondaryText,
+                                                  fontSize: 15
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 15,),
+
+                                    InkWell(
+                                      onTap: (){
+                                        apiCancelRide();
+                                      },
+                                      child: Container(
+                                        width: double.maxFinite,
+                                        padding: const EdgeInsets.all(6),
+                                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(25),
+                                        ),
+                                        child: Stack(
+                                          alignment: Alignment.centerRight,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  "Cancel request",
+                                                  style: TextStyle(
+                                                      color: Colors.redAccent,
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w700
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 25,)
+                                  ],
+                                ),
+
+                              )
+                            ],
+                          )
+                        )
                     ],
                   ),
                   SafeArea(
@@ -492,9 +730,11 @@ class _UserHomeViewState extends State<UserHomeView> {
       Globs.hideHUD();
       if (responseObj[KKey.status] == "1") {
         var payload = responseObj[KKey.payload] as Map? ?? {};
+        requestData = payload;
+        isRequestingService = true;
         setState(() {});
-        mdShowAlert(Globs.appName,
-            responseObj[KKey.message] as String? ?? MSG.success, () {});
+        //mdShowAlert_auto_closing(Globs.appName, responseObj[KKey.message] as String? ?? MSG.success, () {});
+
       } else {
         mdShowAlert(
             "Error", responseObj[KKey.message] as String? ?? MSG.fail, () {});
@@ -524,6 +764,31 @@ class _UserHomeViewState extends State<UserHomeView> {
       Globs.hideHUD();
       mdShowAlert(Globs.appName, error.toString(), () {});
     });
+  }
+
+  void apiCancelRide() {
+    Globs.showHUD();
+    ServiceCall.post({
+      "booking_id": requestData["booking_id"].toString(),
+      "booking_status": requestData["booking_status"].toString()
+    }, isTokenApi: true, SVKey.svUserRideCancelForce,
+        withSuccess: (responseObj) async {
+          Globs.hideHUD();
+          if (responseObj[KKey.status] == "1") {
+            mdShowAlert(
+                Globs.appName, responseObj[KKey.message] as String? ?? MSG.success,
+                    () {
+                      isRequestingService = false;
+                      setState(() {});
+                });
+          } else {
+            mdShowAlert(Globs.appName,
+                responseObj[KKey.message] as String? ?? MSG.fail, () {});
+          }
+        }, failure: (error) async {
+          Globs.hideHUD();
+          mdShowAlert(Globs.appName, error.toString(), () {});
+        });
   }
 
   void getPosition() async {
@@ -623,6 +888,36 @@ class _UserHomeViewState extends State<UserHomeView> {
     newGoogleMapController?.animateCamera(CameraUpdate.newLatLngBounds(latLngBounds, 40));
   }
 
+  void displayActiveDriverOnUserMap(){
+
+    setState(() {
+      markersSet.clear();
+
+      Set<Marker> driversMarkerSet = Set<Marker>();
+
+      for(CurrentDriversModel cdm in currentDrivers){
+
+        LatLng driverPos = LatLng(cdm.latitude!,cdm.longitude!);
+
+        Marker driverMark = Marker(
+            markerId: MarkerId(cdm.user_id!.toString()),
+            icon: activeNearbyIcon!,
+            position: driverPos,
+            rotation: cdm.bearing!
+        );
+
+        driversMarkerSet.add(driverMark);
+
+      }
+
+      setState(() {
+        markersSet= driversMarkerSet;
+      });
+
+
+    });
+  }
+
   void resetMap() {
     setState(() {
       bottomPaddingOfMap = 230.0;
@@ -632,4 +927,66 @@ class _UserHomeViewState extends State<UserHomeView> {
       pLineCoordinates.clear();
     });
   }
+
+  createActiveNearByDriverIconMarker() async{
+    if(activeNearbyIcon == null){
+
+      ImageConfiguration imageConfiguration = ImageConfiguration(
+          bundle: DefaultAssetBundle.of(context),
+          locale: Localizations.maybeLocaleOf(context),
+          textDirection: Directionality.maybeOf(context),
+          size: const Size(2,2)
+      );
+
+      bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+
+      if(isIOS){
+        BitmapDescriptor.fromAssetImage(imageConfiguration, "assets/images/carmap_ios.png").then((value){
+          activeNearbyIcon = value;
+        });
+      }else{
+        BitmapDescriptor.fromAssetImage(imageConfiguration, "assets/images/carmap_android.png").then((value){
+          activeNearbyIcon = value;
+        });
+      }
+
+
+    }
+  }
+
+  void initNotificationService() async{
+
+    PushNotificationSystem pushNotificationSystem = PushNotificationSystem(context: context);
+    pushNotificationSystem.initializeCloudMessaging();
+    String pushToken = await pushNotificationSystem.generateMessagingToken();
+
+    apiUpdatePushToken(pushToken);
+
+  }
+
+  void apiUpdatePushToken(String pushToken){
+    Globs.showHUD();
+    ServiceCall.post(
+        {
+          "push_token": pushToken
+        },
+        isTokenApi: true,
+        SVKey.svUpdatePushToken,
+        withSuccess: (responseObj)async{
+          Globs.hideHUD();
+          if(responseObj[KKey.status]=="1"){
+            if(kDebugMode){
+              print(responseObj[KKey.message] as String? ?? MSG.success);
+            }
+          }else{
+            mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail, () { });
+          }
+        },
+        failure: (error)async{
+          Globs.hideHUD();
+          mdShowAlert(Globs.appName, error.toString(),(){});
+        }
+    );
+  }
+
 }

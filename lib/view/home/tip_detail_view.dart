@@ -1,15 +1,22 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_app/common/common_extension.dart';
 import 'package:transport_app/common_widget/title_subtitle_row.dart';
 
 import '../../common/color_extension.dart';
 import '../../common/globs.dart';
 import '../../common/service_call.dart';
+import '../../cubit/map_requests/map_requests_cubit.dart';
+import '../../model/directions_model.dart';
 
 class TipDetailView extends StatefulWidget {
 
@@ -21,11 +28,20 @@ class TipDetailView extends StatefulWidget {
   State<TipDetailView> createState() => _TipDetailViewState();
 }
 
-class _TipDetailViewState extends State<TipDetailView> with OSMMixinObserver {
+class _TipDetailViewState extends State<TipDetailView>{
+
+  Position? position = null;
+  Completer<GoogleMapController> _controllerGoogleMap = Completer();
+  GoogleMapController? newGoogleMapController;
+  final initialCameraPosition =
+  const CameraPosition(target: LatLng(4.8, -75.7), zoom: 15.0);
+  double bottomPaddingOfMap = 0;
+  List<LatLng> pLineCoordinates = [];
+  Set<Polyline> polylineSet = {};
+  Set<Marker> markersSet = {};
+  Set<Circle> circlesSet = {};
 
   bool isOpen = true;
-
-  late MapController controller;
 
   Map bookinObj = {
 
@@ -36,21 +52,12 @@ class _TipDetailViewState extends State<TipDetailView> with OSMMixinObserver {
   @override
   void initState() {
     super.initState();
-
     apiDetail();
-
-    controller = MapController(
-      initPosition: GeoPoint(latitude: 4.8103487, longitude: -75.7598604),
-    );
-
-    controller.addObserver(this);
-
   }
 
   @override
   void dispose() {
     super.dispose();
-    controller.dispose();
   }
 
   @override
@@ -195,43 +202,29 @@ class _TipDetailViewState extends State<TipDetailView> with OSMMixinObserver {
             SizedBox(
               width: context.width,
               height: context.heigth * 0.35,
-              child: OSMFlutter(
-                controller:controller,
-                osmOption: OSMOption(
-                    enableRotationByGesture: true,
-                    zoomOption: const ZoomOption(
-                      initZoom: 8,
-                      minZoomLevel: 3,
-                      maxZoomLevel: 19,
-                      stepZoom: 1.0,
-                    ),
-                    staticPoints: [
-        
-                    ],
-                    roadConfiguration: const RoadOption(
-                      roadColor: Colors.blueAccent,
-                    ),
-                    markerOption: MarkerOption(
-                        defaultMarker: const  MarkerIcon(
-                          icon: Icon(
-                            Icons.person_pin_circle,
-                            color: Colors.blue,
-                            size: 56,
-                          ),
-                        )
-                    ),
-                    showDefaultInfoWindow: false
-                ),
-                onMapIsReady: (isReady){
-                  if(isReady){
-                    print("Map is ready");
+              child: BlocConsumer<MapRequestsCubit, MapRequestsState>(
+                listener: (context, state) {
+                  if(state is MapRequestsDirectionsSuccess){
+                    drawRoad(state.routes);
                   }
                 },
-                onLocationChanged: (myLocation){
-                  print("User location: $myLocation");
-                },
-                onGeoPointClicked: (location){
-                  print("Clicked location: $location");
+                builder: (context, state) {
+                  return GoogleMap(
+                              padding: EdgeInsets.only(bottom: bottomPaddingOfMap),
+                              mapType: MapType.normal,
+                              myLocationButtonEnabled: true,
+                              myLocationEnabled: true,
+                              zoomGesturesEnabled: true,
+                              zoomControlsEnabled: true,
+                              polylines: polylineSet,
+                              markers: markersSet,
+                              circles: circlesSet,
+                              initialCameraPosition: initialCameraPosition,
+                              onMapCreated: (GoogleMapController controller) {
+                                _controllerGoogleMap.complete(controller);
+                                newGoogleMapController = controller;
+                              },
+                            );
                 },
               ),
             ),
@@ -478,59 +471,110 @@ class _TipDetailViewState extends State<TipDetailView> with OSMMixinObserver {
     );
   }
 
-  void addMarker() async{
+  void setMarkers(LatLng origPos, LatLng destPos) {
+    Marker origLocationMarker = Marker(
+        markerId: MarkerId("pickUpMarker"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+        infoWindow: InfoWindow(
+          //title: address!.placeName,
+            snippet: "Partida"),
+        position: origPos);
 
-    await controller.setMarkerOfStaticPoint(
-        id: "pickup",
-        markerIcon: MarkerIcon(
-            iconWidget: Icon(Icons.location_history_rounded,size: 40,color: TColor.primary)
-        )
-    );
+    Marker destLocationMarker = Marker(
+        markerId: MarkerId("destinyMarker"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        infoWindow: InfoWindow(
+          //title: result!.name!,
+            snippet: "Llegada"),
+        position: destPos);
 
-    await controller.setMarkerOfStaticPoint(
-        id: "dropoff",
-        markerIcon: MarkerIcon(
-            iconWidget: Icon(Icons.car_crash,size: 40,color: TColor.primary)
-        )
-    );
+    markersSet.clear();
 
-    await controller.setStaticPosition([
-      GeoPoint(
-          latitude: double.tryParse(bookinObj["pickup_lat"].toString()) ?? 0.0,
-          longitude: double.tryParse(bookinObj["pickup_long"].toString()) ?? 0.0
-      )],
-        "pickup");
-    await controller.setStaticPosition([
-      GeoPoint(
-          latitude: double.tryParse(bookinObj["drop_lat"].toString()) ?? 0.0,
-          longitude: double.tryParse(bookinObj["drop_long"].toString()) ?? 0.0
-      )],
-        "dropoff");
+    setState(() {
+      markersSet.add(origLocationMarker);
+      markersSet.add(destLocationMarker);
+    });
+  }
 
-    //loadMapRoad();
+  LatLng origPos = LatLng(0, 0);
+  LatLng destPos = LatLng(0, 0);
 
+  void getDirection() async {
+    context.read<MapRequestsCubit>().getDirections(origPos, destPos, context);
   }
 
   void loadMapRoad()async{
-    await controller.drawRoad(
-        GeoPoint(
-            latitude: double.tryParse(bookinObj["pickup_lat"].toString()) ?? 0.0,
-            longitude: double.tryParse(bookinObj["pickup_long"].toString()) ?? 0.0
-        ),
-        GeoPoint(
-            latitude: double.tryParse(bookinObj["drop_lat"].toString()) ?? 0.0,
-            longitude: double.tryParse(bookinObj["drop_long"].toString()) ?? 0.0
-        ),
-        roadType: RoadType.car,
-        roadOption: const RoadOption(roadColor: Colors.blueAccent,roadBorderWidth: 4)
+
+    origPos = LatLng(
+        double.tryParse(bookinObj["pickup_lat"].toString()) ?? 0.0,
+        double.tryParse(bookinObj["pickup_long"].toString()) ?? 0.0
     );
+    
+    destPos = LatLng(double.tryParse(bookinObj["drop_lat"].toString()) ?? 0.0,
+        double.tryParse(bookinObj["drop_long"].toString()) ?? 0.0);
+
+    getDirection();
+
   }
 
-  @override
-  Future<void> mapIsReady(bool isReady) async{
-    if(isReady){
-      addMarker();
+  void drawRoad(List<Routes> res) {
+    print("DIRECTIONS");
+    print(res![0].overviewPolyline!.toJson().toString());
+
+    PolylinePoints polylinePoints = PolylinePoints();
+    List<PointLatLng> decodePolylinePointsResult =
+    polylinePoints.decodePolyline(res![0].overviewPolyline!.points!);
+
+    pLineCoordinates.clear();
+
+    if (decodePolylinePointsResult.isNotEmpty) {
+      decodePolylinePointsResult.forEach((PointLatLng pointLatLng) {
+        pLineCoordinates
+            .add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
+      });
     }
+
+    polylineSet.clear();
+
+    setState(() {
+      Polyline polyline = Polyline(
+          polylineId: PolylineId("polylineId"),
+          color: Colors.blueAccent,
+          jointType: JointType.round,
+          points: pLineCoordinates,
+          width: 5,
+          startCap: Cap.roundCap,
+          endCap: Cap.squareCap,
+          geodesic: true);
+
+      polylineSet.add(polyline);
+    });
+
+    setMarkers(origPos, destPos);
+
+    boundMap();
+  }
+
+  void boundMap() async {
+    LatLngBounds latLngBounds;
+
+    if (origPos.latitude > destPos.latitude &&
+        origPos.longitude > destPos.longitude) {
+      latLngBounds = LatLngBounds(southwest: destPos, northeast: origPos);
+    } else if (origPos.longitude > destPos.longitude) {
+      latLngBounds = LatLngBounds(
+          southwest: LatLng(origPos.latitude, destPos.longitude),
+          northeast: LatLng(destPos.latitude, origPos.longitude));
+    } else if (origPos.latitude > destPos.latitude) {
+      latLngBounds = LatLngBounds(
+          southwest: LatLng(destPos.latitude, origPos.longitude),
+          northeast: LatLng(origPos.latitude, destPos.longitude));
+    } else {
+      latLngBounds = LatLngBounds(southwest: origPos, northeast: destPos);
+    }
+
+    newGoogleMapController
+        ?.animateCamera(CameraUpdate.newLatLngBounds(latLngBounds, 70));
   }
 
   void apiDetail(){
@@ -552,7 +596,6 @@ class _TipDetailViewState extends State<TipDetailView> with OSMMixinObserver {
           if(mounted){
             setState(() {});
           }
-
           await Future.delayed(const Duration(seconds: 3));
           loadMapRoad();
         },

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -20,8 +21,15 @@ import 'common/globs.dart';
 import 'common/service_call.dart';
 import 'cubit/geolocation/geolocation_bloc.dart';
 import 'cubit/map_requests/map_requests_cubit.dart';
+import 'firebase/local_notification_service.dart';
 
 SharedPreferences? prefs;
+
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print('Handling a background message: ${message.messageId}');
+}
 
 void main() async{
   HttpOverrides.global = MyHttpOverrides();
@@ -31,6 +39,10 @@ void main() async{
 
   prefs = await SharedPreferences.getInstance();
   await Firebase.initializeApp();
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  LocalNotificationService.initialize();
 
   if(Globs.udValueBool(Globs.userLogin)){
     ServiceCall.userObj = Globs.udValue(Globs.userPayload) as Map? ?? {};
@@ -153,6 +165,7 @@ class _MyAppState extends State<MyApp> {
           ),
           home: SplashView(changeLanguage: _changeLanguage),
           builder: EasyLoading.init(),
+          navigatorObservers: [routeObserver],
         )
     );
   }

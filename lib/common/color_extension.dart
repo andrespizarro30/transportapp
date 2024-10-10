@@ -1,5 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:vector_math/vector_math.dart';
 
 class TColor{
   static Color get primary => const Color(0xff3DB24B);
@@ -15,7 +19,7 @@ class TColor{
 
   static Color get darkAppBar => const Color(0xff15273d);
 
-  static Color get bg => Colors.white;
+  static Color get bg => const Color(0xffffffff);
 
 }
 
@@ -51,4 +55,24 @@ extension AppContext on BuildContext{
   return Navigator.pop(this);
 }
 
+}
+
+double getBearing(LatLng startPosition, LatLng endPosition){
+  double lat= (startPosition.latitude-endPosition.latitude).abs();
+  double lng= (startPosition.longitude-endPosition.longitude).abs();
+
+  if(startPosition.latitude<endPosition.latitude && startPosition.longitude<endPosition.longitude){
+    return degrees(atan(lng/lat));
+  }else
+  if(startPosition.latitude>=endPosition.latitude && startPosition.longitude<endPosition.longitude){
+    return (90 - degrees(atan(lng/lat)))+90;
+  }else
+  if(startPosition.latitude>=endPosition.latitude && startPosition.longitude>=endPosition.longitude){
+    return degrees(atan(lng/lat))+180;
+  }else
+  if(startPosition.latitude<endPosition.latitude && startPosition.longitude>=endPosition.longitude){
+    return (90 - degrees(atan(lng/lat)))+270;
+  }
+
+  return -1;
 }

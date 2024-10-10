@@ -6,24 +6,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_app/common/common_extension.dart';
-import 'package:transport_app/common/location_helper.dart';
 import 'package:transport_app/common/socket_manager.dart';
 import 'package:transport_app/common_widget/icon_title_button.dart';
 import 'package:transport_app/common_widget/round_button.dart';
 import 'package:transport_app/common_widget/timer_basic.dart';
 import 'package:transport_app/common_widget/timer_frame.dart';
-import 'package:transport_app/view/home/reasons_view.dart';
 
 import 'package:flutter_timer_countdown/flutter_timer_countdown.dart';
 import 'package:transport_app/view/home/support/support_message_view.dart';
-import 'package:transport_app/view/home/tip_detail_view.dart';
-
 
 import '../../common/color_extension.dart';
 import '../../common/globs.dart';
@@ -71,40 +66,18 @@ class _RunRideViewState extends State<RunRideView> {
   TextEditingController txtOTP = TextEditingController();
   TextEditingController txtToll = TextEditingController();
 
-  //1=Accept ride
-  //2=Start
-  //3=Complete
-
-  //late MapController controller;
-
   String timeCount = "...";
   String km = "...";
 
   double ratingVal = 5.0;
+
+  int numMessages = 0;
 
   @override
   void initState() {
     super.initState();
     
     rideObj = widget.rObj;
-    
-    // if(rideObj["booking_status"]<bsStart){
-    //   controller = MapController(
-    //     initPosition: GeoPoint(
-    //         latitude: double.tryParse(rideObj["pickup_lat"].toString()) ?? 0.0,
-    //         longitude: double.tryParse(rideObj["pickup_long"].toString()) ?? 0.0
-    //     )
-    //   );
-    // }else{
-    //   controller = MapController(
-    //       initPosition: GeoPoint(
-    //           latitude: double.tryParse(rideObj["drop_lat"].toString()) ?? 0.0,
-    //           longitude: double.tryParse(rideObj["drop_long"].toString()) ?? 0.0
-    //       )
-    //   );
-    // }
-    //
-    // controller.addObserver(this);
 
     SocketManager.shared.socket?.on("user_cancel_ride", (data) async{
       print("user_cancel_ride socket get : ${data.toString()}");
@@ -114,6 +87,22 @@ class _RunRideViewState extends State<RunRideView> {
         }
       }
     });
+
+    SocketManager.shared.socket?.on("support_message",(data){
+      print("support_message socket get :${data.toString()}");
+      if(data[KKey.status] == "1"){
+        var mObj = data[KKey.payload] as List? ?? [];
+        var senderId = mObj[0]["sender_id"];
+        int receiver = int.parse(rideObj["user_id"] ?? "0");
+        if(senderId == receiver){
+          numMessages += 1;
+        }
+        if(mounted){
+          setState(() {});
+        }
+      }
+    });
+
 
   }
 
@@ -484,15 +473,40 @@ class _RunRideViewState extends State<RunRideView> {
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                           children: [
-                                            IconTitleButton(title: "Chat",icon: Icon(CupertinoIcons.chat_bubble_text_fill),onPress: (){
-                                              context.push(SupportMessageView(
-                                                uObj: {
-                                                  "user_id" : rideObj["user_id"],
-                                                  "name" : rideObj["name"],
-                                                  "image" : rideObj["image"]
-                                                },
-                                              ));
-                                            }),
+                                            Stack(
+                                              alignment: Alignment.centerRight,
+                                              children: [
+                                                IconTitleButton(title: "Chat",icon: Icon(CupertinoIcons.chat_bubble_text_fill),
+                                                onPress: (){
+                                                  numMessages = 0;
+                                                  context.push(SupportMessageView(
+                                                    uObj: {
+                                                      "user_id" : rideObj["user_id"],
+                                                      "name" : rideObj["name"],
+                                                      "image" : rideObj["image"]
+                                                    },
+                                                  ));
+                                                  setState(() {});
+                                                }),
+                                                if(numMessages>0)
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.red,
+                                                      borderRadius: BorderRadius.circular(30),
+                                                    ),
+                                                    constraints: const BoxConstraints(minWidth: 15),
+                                                    child: Text(
+                                                      numMessages.toString(),
+                                                      style: TextStyle(
+                                                          color: TColor.bg,
+                                                          fontSize: 10,
+                                                          fontWeight: FontWeight.w800
+                                                      ),
+                                                    ),
+                                                  )
+                                              ],
+                                            ),
                                             SizedBox(height: 15),
                                             IconTitleButton(title: "Mensaje",icon: Icon(Icons.message),onPress: (){
 
@@ -853,7 +867,6 @@ class _RunRideViewState extends State<RunRideView> {
                                           title:"RATE RIDER",
                                           onPressed: (){
                                             apiSubmitRate();
-                                            //context.push(const TipDetailView());
                                           },
                                         ),
                                       )

@@ -2,6 +2,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,6 +13,7 @@ import 'package:transport_app/common/common_extension.dart';
 import 'package:transport_app/common/service_call.dart';
 import 'package:transport_app/common_widget/icon_title_subtitle.dart';
 import 'package:transport_app/view/home/run_ride_view.dart';
+import 'package:transport_app/view/home/service_value_add.dart';
 import 'package:transport_app/view/home/tip_request_view.dart';
 import 'package:transport_app/view/menu/menu_view.dart';
 
@@ -21,6 +23,8 @@ import '../../common/socket_manager.dart';
 import '../../cubit/geolocation/geolocation_bloc.dart';
 import '../../cubit/geolocation/geolocation_event.dart';
 import '../../cubit/geolocation/geolocation_state.dart';
+import '../../firebase/push_notification.dart';
+import '../../main.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -29,7 +33,7 @@ class HomeView extends StatefulWidget {
   State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProviderStateMixin{
 
   Position? position = null;
   Completer<GoogleMapController> _controllerGoogleMap = Completer();
@@ -41,15 +45,65 @@ class _HomeViewState extends State<HomeView> {
   Set<Marker> markersSet = {};
   Set<Circle> circlesSet = {};
 
+  Map driverRating = {
+    "driver_rating": 5,
+    "acceptante_rating": 100,
+    "cancel_rating": 0
+  };
+
   bool isOpen = true;
 
   bool isDriverOnLine = false;
+
+  int totalDaily = 0;
+
+  late Timer timer;
+
+  late AnimationController lineAnimationController;
+  late Animation<double> lineAnimation;
+
+  // late AnimationController textAnimationController;
+  // late Animation<double> textAnimation;
+
+  void setCurrentLocationInCamera(){
+    LatLng latLng = LatLng(position!.latitude, position!.longitude);
+    CameraPosition cameraPosition = new CameraPosition(target: latLng, zoom: 16);
+    if (newGoogleMapController != null) {
+      newGoogleMapController?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    }
+  }
 
   @override
   void initState() {
     super.initState();
 
+    initNotificationService();
+
+    lineAnimationController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat(reverse: true);
+    lineAnimation = Tween<double>(begin: 0, end: 1).animate(lineAnimationController);
+
+    // textAnimationController = AnimationController(
+    //   duration: const Duration(seconds: 2),
+    //   vsync: this,
+    // )..addStatusListener((status) {
+    //   if (status == AnimationStatus.completed) {
+    //     textAnimationController.reverse();
+    //   } else if (status == AnimationStatus.dismissed) {
+    //     Future.delayed(Duration(seconds: 2), () {
+    //       textAnimationController.forward();
+    //     });
+    //   }
+    // });
+    // textAnimation = Tween<double>(begin: 0, end: 1).animate(textAnimationController);
+    // textAnimationController.forward();
+
     apiHome();
+    apiSummaryDaily();
+    apiDriverRatings();
+
     isDriverOnLine = Globs.udValueBool("is_online");
 
     if(ServiceCall.userType==2){
@@ -66,12 +120,35 @@ class _HomeViewState extends State<HomeView> {
       });
 
     }
+
   }
 
   @override
   void dispose() {
-    super.dispose();
+    routeObserver.unsubscribe(this);
     newGoogleMapController?.dispose();
+    timer.cancel();
+    lineAnimationController.dispose();
+    //textAnimationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ModalRoute? modalRoute = ModalRoute.of(context);
+    if (modalRoute is PageRoute) {
+      routeObserver.subscribe(this, modalRoute);
+    }
+  }
+
+  @override
+  void didPopNext() {
+    onResume();
+  }
+
+  void onResume() {
+    apiSummaryDaily();
   }
 
   @override
@@ -169,7 +246,7 @@ class _HomeViewState extends State<HomeView> {
                           InkWell(
                             borderRadius: BorderRadius.circular(35),
                             onTap: (){
-
+                              setCurrentLocationInCamera();
                             },
                             child: Container(
                               width: 50,
@@ -241,6 +318,25 @@ class _HomeViewState extends State<HomeView> {
                               )
                             ],
                           ),
+                          if(isDriverOnLine)
+                            AnimatedBuilder(
+                              animation: lineAnimation,
+                              builder: (context, child) {
+                                return Container(
+                                  width: MediaQuery.of(context).size.width * lineAnimation.value,
+                                  height: 5,
+                                  color: Colors.blue,
+                                );
+                              },
+                            ),
+                          // if(isDriverOnLine)
+                          //   FadeTransition(
+                          //     opacity: textAnimation, // Use the animation for opacity
+                          //     child: Text(
+                          //       "Looking for service",
+                          //       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          //     ),
+                          //   ),
                           if(isOpen)
                             Container(
                               width: context.width,
@@ -255,7 +351,7 @@ class _HomeViewState extends State<HomeView> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 IconTitleSubtitleButton(
-                                    title: "95.0",
+                                    title: "${(double.tryParse(driverRating["acceptante_rating"].toString()) ?? 0.0).toStringAsFixed(0)}%",
                                     subTitle: "Aceptacion",
                                     icon: Icon(Icons.check_circle,size: 30,color: TColor.primary,),
                                     onPress: (){
@@ -270,7 +366,7 @@ class _HomeViewState extends State<HomeView> {
                                   ),
                                 ),
                                 IconTitleSubtitleButton(
-                                    title: "4.75",
+                                    title: (double.tryParse(driverRating["driver_rating"].toString()) ?? 0.0).toStringAsFixed(2),
                                     subTitle: "Califcacion",
                                     icon: Icon(Icons.star_rate,size: 30,color: TColor.primary,),
                                     onPress: (){
@@ -285,7 +381,7 @@ class _HomeViewState extends State<HomeView> {
                                   ),
                                 ),
                                 IconTitleSubtitleButton(
-                                    title: "2.0%",
+                                    title: "${(double.tryParse(driverRating["cancel_rating"].toString()) ?? 0.0).toStringAsFixed(0)}%",
                                     subTitle: "Cancelacion",
                                     icon: Icon(Icons.cancel_presentation_outlined,size: 30,color: TColor.primary,),
                                     onPress: (){
@@ -340,7 +436,7 @@ class _HomeViewState extends State<HomeView> {
                                       SizedBox(width: 8),
 
                                       Text(
-                                        "155.000",
+                                        totalDaily.toString(),
                                         style: TextStyle(
                                             color: TColor.primaryText,
                                             fontSize: 18,
@@ -415,6 +511,9 @@ class _HomeViewState extends State<HomeView> {
             return Center(child: Text('Error: ${state.error}'));
           }else{
             getPosition();
+            if(!isDriverOnLine){
+              stopGetPosition();
+            }
             return Center(child: Text('Awaiting Location...'));
           }
         }
@@ -439,6 +538,13 @@ class _HomeViewState extends State<HomeView> {
             );
             if(mounted){
               setState(() {});
+            }
+
+            if(isDriverOnLine){
+              resumeGetPosition();
+            }else
+            if(!isDriverOnLine){
+              stopGetPosition();
             }
           }else{
             isDriverOnLine = !isDriverOnLine;
@@ -476,8 +582,144 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
+  void apiSummaryDaily() {
+    Globs.showHUD();
+    ServiceCall.post(
+        {},
+        isTokenApi: true,
+        SVKey.svDriverSummaryDaily,
+        withSuccess: (responseObj)async{
+          Globs.hideHUD();
+          if(responseObj[KKey.status]=="1"){
+            var rObj = (responseObj[KKey.payload] as List? ?? [])[0] as Map;
+            if(rObj.isNotEmpty){
+
+              int targetValue = rObj["total_amt"];
+
+              int difIncrement = targetValue - totalDaily;
+
+              if(difIncrement>0){
+                showValueAdded(targetValue,difIncrement);
+              }
+
+            }
+          }else{
+            //mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail, () { });
+          }
+        },
+        failure: (error)async{
+          Globs.hideHUD();
+          //mdShowAlert(Globs.appName, error.toString(),(){});
+        }
+    );
+  }
+
+  void apiDriverRatings() {
+    Globs.showHUD();
+    ServiceCall.post(
+        {},
+        isTokenApi: true,
+        SVKey.svDriverRatings,
+        withSuccess: (responseObj)async{
+          Globs.hideHUD();
+          if(responseObj[KKey.status]=="1"){
+            var rObj = responseObj[KKey.payload] as Map? ?? {};
+            if(rObj.isNotEmpty){
+              driverRating = rObj;
+              if(mounted){
+                setState(() {});
+              }
+            }
+          }else{
+            //mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail, () { });
+          }
+        },
+        failure: (error)async{
+          Globs.hideHUD();
+          //mdShowAlert(Globs.appName, error.toString(),(){});
+        }
+    );
+  }
+
   void getPosition() async{
     BlocProvider.of<GeolocationBloc>(context).add(StartLocationTracking());
+  }
+
+  void stopGetPosition() async{
+    BlocProvider.of<GeolocationBloc>(context).add(StopLocationTracking());
+  }
+
+  void resumeGetPosition() async{
+    BlocProvider.of<GeolocationBloc>(context).add(ResumeLocationTracking());
+  }
+
+  void initNotificationService() async{
+
+    PushNotificationSystem pushNotificationSystem = PushNotificationSystem(context: context);
+    pushNotificationSystem.initializeCloudMessaging();
+    String pushToken = await pushNotificationSystem.generateMessagingToken();
+
+    apiUpdatePushToken(pushToken);
+
+  }
+
+  void apiUpdatePushToken(String pushToken){
+    Globs.showHUD();
+    ServiceCall.post(
+        {
+          "push_token": pushToken
+        },
+        isTokenApi: true,
+        SVKey.svUpdatePushToken,
+        withSuccess: (responseObj)async{
+          Globs.hideHUD();
+          if(responseObj[KKey.status]=="1"){
+            if(kDebugMode){
+              print(responseObj[KKey.message] as String? ?? MSG.success);
+            }
+          }else{
+            mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail, () { });
+          }
+        },
+        failure: (error)async{
+          Globs.hideHUD();
+          mdShowAlert(Globs.appName, error.toString(),(){});
+        }
+    );
+  }
+
+  void showValueAdded(int targetValue,int difIncrement) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 50,
+        left: (MediaQuery.of(context).size.width - (MediaQuery.of(context).size.width / 3)) / 2,
+        child: ServiceValueAdded(value: difIncrement.toString()),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(const Duration(seconds: 2), () {
+      overlayEntry.remove();
+      int increment = (difIncrement / 15).round();
+
+      const Duration interval = Duration(milliseconds: 200);
+
+      timer = Timer.periodic(interval, (Timer timer) {
+        setState(() {
+          if (totalDaily < targetValue) {
+            totalDaily = (totalDaily + increment > targetValue)
+                ? targetValue
+                : totalDaily + increment;
+          } else {
+            timer.cancel();
+          }
+        });
+      });
+
+    });
+
   }
 
 }

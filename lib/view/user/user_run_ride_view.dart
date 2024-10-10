@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:geolocator/geolocator.dart';
@@ -72,6 +71,8 @@ class _UserRunRideViewState extends State<UserRunRideView> {
   String km = "...";
 
   double ratingVal = 5.0;
+
+  int numMessages = 0;
 
   @override
   void initState() {
@@ -146,6 +147,22 @@ class _UserRunRideViewState extends State<UserRunRideView> {
         }
       }
     });
+
+    SocketManager.shared.socket?.on("support_message",(data){
+      print("support_message socket get :${data.toString()}");
+      if(data[KKey.status] == "1"){
+        var mObj = data[KKey.payload] as List? ?? [];
+        var senderId = mObj[0]["sender_id"];
+        int receiver = int.parse(rideObj["driver_id"] ?? "0");
+        if(senderId == receiver){
+          numMessages += 1;
+        }
+        if(mounted){
+          setState(() {});
+        }
+      }
+    });
+
   }
 
   void openUserRideCancelPopUp() {
@@ -521,19 +538,43 @@ class _UserRunRideViewState extends State<UserRunRideView> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  IconTitleButton(
-                                      title: "Chat",
-                                      icon: Icon(
-                                          CupertinoIcons.chat_bubble_text_fill),
-                                      onPress: () {
-                                        context.push(SupportMessageView(
-                                          uObj: {
-                                            "user_id": rideObj["driver_id"],
-                                            "name": rideObj["name"],
-                                            "image": rideObj["image"]
-                                          },
-                                        ));
-                                      }),
+                                  Stack(
+                                    alignment: Alignment.centerRight,
+                                    children: [
+                                      IconTitleButton(
+                                          title: "Chat",
+                                          icon: Icon(
+                                              CupertinoIcons.chat_bubble_text_fill),
+                                          onPress: () {
+                                            numMessages = 0;
+                                            context.push(SupportMessageView(
+                                              uObj: {
+                                                "user_id": rideObj["driver_id"],
+                                                "name": rideObj["name"],
+                                                "image": rideObj["image"]
+                                              },
+                                            ));
+                                            setState(() {});
+                                          }),
+                                      if(numMessages>0)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.circular(30),
+                                          ),
+                                          constraints: const BoxConstraints(minWidth: 15),
+                                          child: Text(
+                                            numMessages.toString(),
+                                            style: TextStyle(
+                                                color: TColor.bg,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w800
+                                            ),
+                                          ),
+                                        )
+                                    ],
+                                  ),
                                   SizedBox(height: 15),
                                   IconTitleButton(
                                       title: "Mensaje",
@@ -703,7 +744,6 @@ class _UserRunRideViewState extends State<UserRunRideView> {
                                     title: "RATE RIDER",
                                     onPressed: () {
                                       apiSubmitRate();
-                                      //context.push(const TipDetailView());
                                     },
                                   ),
                                 )
@@ -953,6 +993,8 @@ class _UserRunRideViewState extends State<UserRunRideView> {
 
   String statusText() {
     switch (rideObj["booking_status"]) {
+      case 1:
+        return "On way";
       case 2:
         return "On way";
       case 3:

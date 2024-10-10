@@ -15,20 +15,57 @@ extension MDExtensionState on State{
     showDialog(
       context: context,
       barrierDismissible: !isForce,
-      builder: (context) => CupertinoAlertDialog(
-      title: Text(title),
-      content: Text(message),
-      actions: [
-        CupertinoDialogAction(
-          child: Text(buttonTitle),
-          isDefaultAction: true,
-          onPressed: (){
-            Navigator.pop(context);
-            onPressed();
-          },
-        )
-      ],
-    ));
+      builder: (context){
+        return CupertinoAlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            CupertinoDialogAction(
+              child: Text(buttonTitle),
+              isDefaultAction: true,
+              onPressed: (){
+                Navigator.pop(context);
+                onPressed();
+              },
+            )
+          ],
+        );
+      }
+    );
+  }
+
+  void mdShowAlert_auto_closing(String title,
+      String message,
+      VoidCallback onPressed,
+      {String buttonTitle = "OK",
+        TextAlign mainTextAlignment = TextAlign.center,
+        isForce = false
+      }){
+
+    showDialog(
+        context: context,
+        barrierDismissible: !isForce,
+        builder: (context){
+
+          Future.delayed(Duration(seconds: 3), () {
+            Navigator.of(context).pop();
+          });
+
+          return CupertinoAlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              CupertinoDialogAction(
+                child: Text(buttonTitle),
+                isDefaultAction: true,
+                onPressed: (){
+
+                },
+              )
+            ],
+          );
+        }
+    );
   }
 
   void endEditing(){
