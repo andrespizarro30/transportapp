@@ -47,6 +47,38 @@ class MapRequestsCubit extends Cubit<MapRequestsState> {
     }
   }
 
+  void getDriversDirections(LatLng origPos, LatLng destPos, int driver_id, context) async{
+
+    if(origPos != null && destPos != null){
+
+      String directionsURL = "https://maps.googleapis.com/maps/api/directions/json?"
+          "origin=${origPos.latitude},${origPos.longitude}&"
+          "destination=${destPos.latitude},${destPos.longitude}&"
+          "key=${geoCodingKey}";
+
+      print(directionsURL);
+
+      var response = await ServiceCall.getRequest(Uri.parse(directionsURL));
+
+      if(response != "failed"){
+
+        final directions = DirectionsModel.fromJson(response);
+
+        if(directions.status == "OK"){
+          final Map<String, dynamic> dataRoutes = {};
+          dataRoutes["driver_id"] = driver_id;
+          dataRoutes["routes"] = directions.routes;
+          emit(MapRequestsDriversDirectionsSuccess(dataRoutes));
+        }else{
+          emit(MapRequestsDriversDirectionsFailed());
+        }
+      }else{
+        emit(MapRequestsDriversDirectionsFailed());
+      }
+
+    }
+  }
+
   void searchCoordinateAddress(Position position, context) async{
 
     String placeAddress = "";

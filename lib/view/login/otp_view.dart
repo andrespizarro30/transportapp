@@ -107,7 +107,7 @@ class _OTPViewState extends State<OTPView> {
             if(ServiceCall.userType == 1){
               context.push(const UserHomeView());
             }else{
-              if(ServiceCall.userObj[KKey.status] == 1){
+              if(ServiceCall.userObj[KKey.status] == 1 && ServiceCall.userObj["name"] != ""){
                 context.push(const HomeView());
               }else{
                 context.push(const ProfileImageView());

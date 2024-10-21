@@ -10,10 +10,12 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:maps_toolkit/maps_toolkit.dart' as mapToolKit;
 import 'package:transport_app/common/color_extension.dart';
 import 'package:transport_app/common/common_extension.dart';
 import 'package:transport_app/common/dbhelpers.dart';
+import 'package:transport_app/common/helpers.dart';
 import 'package:transport_app/common/service_call.dart';
 import 'package:transport_app/common/socket_manager.dart';
 import 'package:transport_app/common_widget/location_select_button.dart';
@@ -78,8 +80,11 @@ class _UserHomeViewState extends State<UserHomeView> {
   List<CurrentDriversModel> currentDrivers = [];
   BitmapDescriptor? activeNearbyIcon;
 
+  double suggestedPrice = 0;
+  List availableDriversList = [];
+  bool isAvailableDriverList = false;
   bool isRequestingService = false;
-  Map requestData = {};
+  Map<String,dynamic> requestData = {};
 
   @override
   void initState() {
@@ -358,7 +363,7 @@ class _UserHomeViewState extends State<UserHomeView> {
                       const SizedBox(
                         height: 15,
                       ),
-                      if(!isRequestingService)
+                      if(!isRequestingService && !isAvailableDriverList)
                         Container(
                         padding: const EdgeInsets.symmetric(
                             vertical: 15, horizontal: 20),
@@ -415,169 +420,10 @@ class _UserHomeViewState extends State<UserHomeView> {
                           ],
                         ),
                       ),
-                      if(isRequestingService)
-                        Container(
-                          height: MediaQuery.of(context).size.height * 0.5,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 15, horizontal: 20),
-                          decoration: const BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(10),
-                                  topRight: Radius.circular(10)),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black12,
-                                    blurRadius: 10,
-                                    offset: Offset(0, -5))
-                              ]),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(vertical: 15),
-                                decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(10),
-                                        topRight: Radius.circular(10)
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color: Colors.black12,
-                                          blurRadius: 10,
-                                          offset: Offset(0, -5)
-                                      )
-                                    ]
-                                ),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "${requestData["est_duration"] ?? ""} min",
-                                      style: TextStyle(
-                                          color: TColor.primaryText,
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.w800
-                                      ),
-                                    ),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            "${requestData["est_total_distance"] ?? ""} KM",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                                color: TColor.secondaryText,
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w800
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: Text(
-                                            "\$${requestData["amt"] ?? ""}",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                                color: TColor.secondaryText,
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w800
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 15),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 10,
-                                            height: 10,
-                                            decoration: BoxDecoration(
-                                                color: TColor.secondary,
-                                                borderRadius: BorderRadius.circular(10)
-                                            ),
-                                          ),
-                                          SizedBox(width: 15),
-                                          Expanded(
-                                            child: Text(
-                                              "${requestData["pickup_address"] ?? ""}",
-                                              style: TextStyle(
-                                                  color: TColor.secondaryText,
-                                                  fontSize: 15
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 10,
-                                            height: 10,
-                                            decoration: BoxDecoration(
-                                                color: TColor.primary
-                                            ),
-                                          ),
-                                          SizedBox(width: 15),
-                                          Expanded(
-                                            child: Text(
-                                              "${requestData["drop_address"] ?? ""}",
-                                              style: TextStyle(
-                                                  color: TColor.secondaryText,
-                                                  fontSize: 15
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 15,),
-
-                                    InkWell(
-                                      onTap: (){
-                                        apiCancelRide();
-                                      },
-                                      child: Container(
-                                        width: double.maxFinite,
-                                        padding: const EdgeInsets.all(6),
-                                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(25),
-                                        ),
-                                        child: Stack(
-                                          alignment: Alignment.centerRight,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  "Cancel request",
-                                                  style: TextStyle(
-                                                      color: Colors.redAccent,
-                                                      fontSize: 14,
-                                                      fontWeight: FontWeight.w700
-                                                  ),
-                                                ),
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 25,)
-                                  ],
-                                ),
-
-                              )
-                            ],
-                          )
-                        )
+                      if(!isRequestingService && isAvailableDriverList)
+                        getDriversList(),
+                      if(isRequestingService && !isAvailableDriverList)
+                        requestSentToDriver(),
                     ],
                   ),
                   SafeArea(
@@ -697,6 +543,8 @@ class _UserHomeViewState extends State<UserHomeView> {
                           100
                       : (selectObj["est_price_max"] as double? ?? 0.0);
 
+              suggestedPrice =  double.tryParse(estMaxVal!.toString())!;
+
               apiBookingRequest({
                 "pickup_latitude": "${pickupLocation?.latitude ?? 0.0}",
                 "pickup_longitude": "${pickupLocation?.longitude ?? 0.0}",
@@ -725,16 +573,19 @@ class _UserHomeViewState extends State<UserHomeView> {
 
   void apiBookingRequest(Map<String, String> parameter) {
     Globs.showHUD();
-    ServiceCall.post(parameter, SVKey.svBookingRequest, isTokenApi: true,
+    ServiceCall.post(parameter, SVKey.svBookingRequestIndividual, isTokenApi: true,
         withSuccess: (responseObj) async {
       Globs.hideHUD();
       if (responseObj[KKey.status] == "1") {
-        var payload = responseObj[KKey.payload] as Map? ?? {};
+        var payload = responseObj[KKey.payload] as Map<String,dynamic>? ?? {};
+        availableDriversList = responseObj["driverslist"] as List ?? [];
         requestData = payload;
-        isRequestingService = true;
-        setState(() {});
+        //availableDriversList = Helpers.convertListValuesToString(availableDriversList);
+        //requestData = Helpers.convertMapValuesToString(requestData);
+        isAvailableDriverList = true;
+        //isRequestingService = true;
         //mdShowAlert_auto_closing(Globs.appName, responseObj[KKey.message] as String? ?? MSG.success, () {});
-
+        getDriversDistance();
       } else {
         mdShowAlert(
             "Error", responseObj[KKey.message] as String? ?? MSG.fail, () {});
@@ -743,6 +594,35 @@ class _UserHomeViewState extends State<UserHomeView> {
       Globs.hideHUD();
       mdShowAlert("Error", error.toString() as String? ?? MSG.fail, () {});
     });
+  }
+
+  void getDriversDistance() {
+
+    final routeRequest = BlocProvider.of<MapRequestsCubit>(context);
+
+    routeRequest.stream.listen((state) {
+      if (state is MapRequestsDriversDirectionsSuccess) {
+        availableDriversList.forEach((driver) {
+          if(driver["user_id"]==state.dataRoutes["driver_id"]){
+            List<Routes> routes = state.dataRoutes["routes"];
+            driver["distance_from_me"] = routes[0].legs![0].distance!.value.toString();
+            setState(() {});
+          }
+        });
+      }else
+      if (state is MapRequestsDriversDirectionsFailed) {
+
+      }
+    });
+
+    availableDriversList.forEach((driver) {
+      LatLng driverPos = LatLng(double.tryParse(driver["lati"]) ?? 0.0, double.tryParse(driver["longi"]) ?? 0.0);
+      LatLng currentPos = LatLng(position!.latitude, position!.longitude);
+      BlocProvider.of<MapRequestsCubit>(context).getDriversDirections(driverPos, currentPos, driver["user_id"], context);
+    });
+
+
+
   }
 
   void apiHome() {
@@ -791,6 +671,24 @@ class _UserHomeViewState extends State<UserHomeView> {
         });
   }
 
+  void apiCallDriverIndividual(Map<String, dynamic> parameter) {
+    Globs.showHUD();
+    ServiceCall.post(parameter, SVKey.svCallDriverIndividual, isTokenApi: true,
+        withSuccess: (responseObj) async {
+          Globs.hideHUD();
+          if (responseObj[KKey.status] == "1") {
+            isRequestingService = true;
+            setState(() {});
+          } else {
+            mdShowAlert(
+                "Error", responseObj[KKey.message] as String? ?? MSG.fail, () {});
+          }
+        }, failure: (error) async {
+          Globs.hideHUD();
+          mdShowAlert("Error", error.toString() as String? ?? MSG.fail, () {});
+        });
+  }
+
   void getPosition() async {
     BlocProvider.of<GeolocationBloc>(context).add(StartLocationTracking());
   }
@@ -825,7 +723,7 @@ class _UserHomeViewState extends State<UserHomeView> {
 
     polylineSet.clear();
 
-    setState(() {
+    //setState(() {
       Polyline polyline = Polyline(
           polylineId: PolylineId("polylineId"),
           color: Colors.blueAccent,
@@ -837,7 +735,7 @@ class _UserHomeViewState extends State<UserHomeView> {
           geodesic: true);
 
       polylineSet.add(polyline);
-    });
+    //});
 
     Marker origLocationMarker = Marker(
         markerId: MarkerId("pickUpMarker"),
@@ -890,7 +788,7 @@ class _UserHomeViewState extends State<UserHomeView> {
 
   void displayActiveDriverOnUserMap(){
 
-    setState(() {
+    //setState(() {
       markersSet.clear();
 
       Set<Marker> driversMarkerSet = Set<Marker>();
@@ -910,12 +808,12 @@ class _UserHomeViewState extends State<UserHomeView> {
 
       }
 
-      setState(() {
-        markersSet= driversMarkerSet;
-      });
+      markersSet= driversMarkerSet;
+
+      setState(() {});
 
 
-    });
+    //});
   }
 
   void resetMap() {
@@ -986,6 +884,330 @@ class _UserHomeViewState extends State<UserHomeView> {
           Globs.hideHUD();
           mdShowAlert(Globs.appName, error.toString(),(){});
         }
+    );
+  }
+
+  Widget getDriversList(){
+
+    NumberFormat formatter = NumberFormat.decimalPatternDigits(
+      locale: 'en_us',
+      decimalDigits: 0,
+    );
+
+    return Stack(
+      alignment: AlignmentDirectional.topCenter,
+      children: [
+        Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          padding: const EdgeInsets.symmetric(
+              vertical: 25, horizontal: 5),
+          decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10)),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: Offset(0, -5))
+              ]),
+          child: ListView.builder(
+              itemCount: availableDriversList.length,
+              itemBuilder: (BuildContext context, int index) {
+        
+                return GestureDetector(
+                  onTap: (){
+                    requestData = requestData;
+                    setState(() {
+                      isAvailableDriverList = false;
+                      apiCallDriverIndividual({
+                        "push_token": availableDriversList[index]["push_token"],
+                        "driver_id": availableDriversList[index]["user_id"].toString(),
+                        "pickup_address": requestData["pickup_address"],
+                        "booking_id": requestData["booking_id"].toString(),
+                        "service_name": requestData["service_name"],
+                        "color": requestData["color"],
+                        "name": requestData["name"],
+                        "pickup_date": requestData["pickup_date"],
+                        "pickup_lat": requestData["pickup_lat"],
+                        "pickup_long": requestData["pickup_long"],
+                        "drop_lat": requestData["drop_lat"],
+                        "drop_long": requestData["drop_long"],
+                        "pickup_address": requestData["pickup_address"],
+                        "drop_address": requestData["drop_address"],
+                        "amt": requestData["amt"],
+                        "payment_type": requestData["payment_type"].toString(),
+                        "est_total_distance": requestData["est_total_distance"],
+                        "est_duration": requestData["est_duration"],
+                        "pickup_accpet_time": requestData["accpet_time"].toString(),
+                        "request_time_out": requestData["accpet_time"].toString(),
+                        "request_driver_id": requestData["request_driver_id"].toString()
+                      });
+                      setState(() {});
+                    });
+                  },
+                  child: Card(
+                    color: Colors.white,
+                    elevation: 3,
+                    shadowColor: Colors.green,
+                    margin: const EdgeInsets.all(8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        FadeInImage(
+                          placeholder: AssetImage('assets/images/car.png'),
+                          //image: NetworkImage("https://firebasestorage.googleapis.com/v0/b/plataformatransporte-b20ba.appspot.com/o/${dList[index]["carMake"]}_${dList[index]["carModel"]}.jpeg?alt=media&token=dc8ab158-472d-4150-b19b-2fa87971b4d6"),
+                          image: NetworkImage(availableDriversList[index]["car_image"]),
+                          width: 70,
+                          height: 70,
+                          fit: BoxFit.cover,
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              availableDriversList[index]["brand_name"],
+                              style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black54
+                              ),
+                            ),
+                            Text(
+                                "${availableDriversList[index]["model_name"]}-${availableDriversList[index]["series_name"]}",
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.black54
+                                )
+                            ),
+                            const SizedBox(height: 2,),
+                            Text(
+                              "${estDistInKm.toStringAsFixed(2)} km",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold
+                              ),
+                            ),
+                            const SizedBox(height: 2,),
+                            Text(
+                              "${estTimeInMin.toStringAsFixed(0)}" + " min",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black
+                              ),
+                            ),
+                            const SizedBox(height: 2,),
+                            Text(
+                              "Distancia real de mí:",
+                              style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.bold
+                              ),
+                            ),
+                            const SizedBox(height: 2,),
+                            Text(
+                                "${availableDriversList[index]["distance_from_me"]}" + "mts",
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.black54,
+                                    fontWeight: FontWeight.bold
+                                )
+                            ),
+                            const SizedBox(height: 2,),
+                            Text(
+                              "COP ${formatter.format(suggestedPrice)}",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    )
+                  ),
+                );
+              }
+          ),
+        ),
+        Container(
+          height: 20,
+          width: 20,
+          child: InkWell(
+              onTap: (){
+                isAvailableDriverList=false;
+                setState(() {});
+              },
+              child: Icon(Icons.close,size: 30,color: Colors.black,)
+          ),
+        ),
+      ],
+    );
+
+  }
+
+  Widget requestSentToDriver(){
+    return Container(
+        height: MediaQuery.of(context).size.height * 0.5,
+        padding: const EdgeInsets.symmetric(
+            vertical: 5, horizontal: 5),
+        decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10)),
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 10,
+                  offset: Offset(0, -5))
+            ]),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10)
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 10,
+                        offset: Offset(0, -5)
+                    )
+                  ]
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    "${requestData["est_duration"] ?? ""} min",
+                    style: TextStyle(
+                        color: TColor.primaryText,
+                        fontSize: 25,
+                        fontWeight: FontWeight.w800
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "${requestData["est_total_distance"] ?? ""} KM",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: TColor.secondaryText,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          "\$${requestData["amt"] ?? ""}",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: TColor.secondaryText,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 15),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                              color: TColor.secondary,
+                              borderRadius: BorderRadius.circular(10)
+                          ),
+                        ),
+                        SizedBox(width: 15),
+                        Expanded(
+                          child: Text(
+                            "${requestData["pickup_address"] ?? ""}",
+                            style: TextStyle(
+                                color: TColor.secondaryText,
+                                fontSize: 15
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                              color: TColor.primary
+                          ),
+                        ),
+                        SizedBox(width: 15),
+                        Expanded(
+                          child: Text(
+                            "${requestData["drop_address"] ?? ""}",
+                            style: TextStyle(
+                                color: TColor.secondaryText,
+                                fontSize: 15
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 15,),
+
+                  InkWell(
+                    onTap: (){
+                      apiCancelRide();
+                    },
+                    child: Container(
+                      width: double.maxFinite,
+                      padding: const EdgeInsets.all(6),
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Stack(
+                        alignment: Alignment.centerRight,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Cancel request",
+                                style: TextStyle(
+                                    color: Colors.redAccent,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 25,)
+                ],
+              ),
+
+            )
+          ],
+        )
     );
   }
 

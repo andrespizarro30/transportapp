@@ -79,9 +79,9 @@ class Globs{
 }
 
 class SVKey{
-  static const mainUrl = "http://192.168.10.19:3001";
+  //static const mainUrl = "http://192.168.10.10:3001";
   //static const mainUrl = "http://localhost:3001";
-  //static const mainUrl = "https://transport-app-gkccfyhrgua4ezg7.eastus-01.azurewebsites.net";
+  static const mainUrl = "https://transportapp.azurewebsites.net";
   static const baseUrl = "$mainUrl/api/";
   static const nodeUrl = mainUrl;
 
@@ -111,6 +111,8 @@ class SVKey{
 
   static const svStaticData = "${baseUrl}static_data";
 
+  static const svBookingRequestIndividual = "${baseUrl}booking_request_individual";
+
   static const svBookingRequest = "${baseUrl}booking_request";
   static const svUpdateLocationDriver = "${baseUrl}update_location";
   static const svDriverGoOnline = "${baseUrl}driver_online";
@@ -125,6 +127,8 @@ class SVKey{
   static const svRideCancel = "${baseUrl}driver_cancel_ride";
   static const svUserRideCancel = "${baseUrl}user_cancel_ride";
   static const svUserRideCancelForce = "${baseUrl}user_cancel_ride_force";
+
+  static const svCallDriverIndividual = "${baseUrl}call_driver_individual";
 
   static const svUserAllRides = "${baseUrl}user_all_ride_list";
   static const svDriverAllRides = "${baseUrl}driver_all_ride_list";

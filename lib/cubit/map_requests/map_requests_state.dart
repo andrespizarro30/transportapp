@@ -17,6 +17,12 @@ class MapRequestsDirectionsSuccess extends MapRequestsState {
 
 class MapRequestsDirectionsFailed extends MapRequestsState {}
 
+class MapRequestsDriversDirectionsSuccess extends MapRequestsState {
+  final Map<String, dynamic> dataRoutes;
+  const MapRequestsDriversDirectionsSuccess(this.dataRoutes);
+}
+
+class MapRequestsDriversDirectionsFailed extends MapRequestsState {}
 
 class MapRequestsAddressSuccess extends MapRequestsState {
   final Address address;

@@ -71,9 +71,12 @@ class ZoneListModel {
   static Future<List<ZoneListModel>> getActiveList() async{
     var db = await DBHelper.shared().db;
     if(db != null){
-      List<Map> list = await db.rawQuery("SELECT zl.* FROM ${DBHelper.tbZoneList} AS zl "
+
+      String sqlQry = "SELECT zl.* FROM ${DBHelper.tbZoneList} AS zl "
           "INNER JOIN ${DBHelper.tbPriceDetail} AS pd ON pd.${DBHelper.zone_id} = zl.${DBHelper.zone_id} AND pd.${DBHelper.status}='1' "
-          "WHERE zl.${DBHelper.status}='1' GROUP BY zl.${DBHelper.zone_id}");
+          "WHERE zl.${DBHelper.status}='1' GROUP BY zl.${DBHelper.zone_id}";
+
+      List<Map> list = await db.rawQuery(sqlQry);
       return list.map((zObj) => ZoneListModel.fromJson(zObj)).toList();
     }else{
       return [];
