@@ -11,6 +11,7 @@ import "package:transport_app/common_widget/round_button.dart";
 
 import "../../common/globs.dart";
 import "../../common_widget/drop_down_button.dart";
+import "../home/home_view.dart";
 
 class DriverEditProfileView extends StatefulWidget {
   const DriverEditProfileView({super.key});
@@ -284,8 +285,8 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
               ),
               RoundButton(title: "UPDATE", onPressed: (){
                 btnUpdateAction();
-              })
-
+              }),
+              SizedBox(height: 30,)
 
             ],
           ),
@@ -394,7 +395,9 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
               Globs.udSet(ServiceCall.userObj, Globs.userPayload);
               Globs.udBoolSet(true, Globs.userLogin);
 
-              mdShowAlert("Updated", responseObj[KKey.message] ?? MSG.success, () { });
+              mdShowAlert("Updated", responseObj[KKey.message] ?? MSG.success, () {
+                context.push(const HomeView());
+              });
 
               if(mounted){
                 setState(() {

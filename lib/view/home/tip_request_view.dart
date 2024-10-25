@@ -153,7 +153,7 @@ class _TipRequestViewState extends State<TipRequestView> with SingleTickerProvid
                       child: Column(
                         children: [
                           Text(
-                            "${widget.bObj["est_duration"] ?? ""} min",
+                            "${double.parse(widget.bObj["est_duration"]).ceil() ?? "0"} min",
                             style: TextStyle(
                                 color: TColor.primaryText,
                                 fontSize: 25,

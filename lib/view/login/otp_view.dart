@@ -105,7 +105,11 @@ class _OTPViewState extends State<OTPView> {
             mdShowAlert("Success", "Successfully signed in api call", () {});
 
             if(ServiceCall.userType == 1){
-              context.push(const UserHomeView());
+              if(ServiceCall.userObj[KKey.status] == 1 && ServiceCall.userObj["name"] != ""){
+                context.push(const UserHomeView());
+              }else{
+                context.push(const ProfileImageView());
+              }
             }else{
               if(ServiceCall.userObj[KKey.status] == 1 && ServiceCall.userObj["name"] != ""){
                 context.push(const HomeView());

@@ -35,7 +35,7 @@ class LoginCubit extends Cubit<LoginState> {
           Globs.udBoolSet(false,"is_online");
           Globs.udBoolSet(true, Globs.userLogin);
           emit(LoginApiResultState());
-          //emit(TokenState(ServiceCall.userObj["auth_token"]));
+          emit(TokenState(ServiceCall.userObj["auth_token"]));
           emit(LoginInitialState());
         }else{
           emit(LoginErrortState(responseObj[KKey.message] ?? MSG.fail));

@@ -11,6 +11,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart' as lottie;
 import 'package:maps_toolkit/maps_toolkit.dart' as mapToolKit;
 import 'package:transport_app/common/color_extension.dart';
 import 'package:transport_app/common/common_extension.dart';
@@ -125,24 +126,39 @@ class _UserHomeViewState extends State<UserHomeView> {
 
         int index = currentDrivers.indexWhere((element) => element.user_id == userId);
 
+        num distMts = mapToolKit.SphericalUtil.computeDistanceBetween(
+            mapToolKit.LatLng(pickupLocation!.latitude,pickupLocation!.longitude),
+            mapToolKit.LatLng(latitude,longitude)
+        );
+
         if(index>=0){
 
-          LatLng lastDriverPosition = LatLng(currentDrivers[index].latitude!, currentDrivers[index].longitude!);
+          if(distMts<=3000){
 
-          currentDrivers[index].latitude = latitude;
-          currentDrivers[index].longitude = longitude;
+            LatLng lastDriverPosition = LatLng(currentDrivers[index].latitude!, currentDrivers[index].longitude!);
 
-          LatLng currentDriverPosition = LatLng(latitude, longitude);
+            currentDrivers[index].latitude = latitude;
+            currentDrivers[index].longitude = longitude;
 
-          double bearing = 0.0;
-          if(lastDriverPosition != currentDriverPosition){
-            bearing = getBearing(lastDriverPosition, currentDriverPosition);
+            LatLng currentDriverPosition = LatLng(latitude, longitude);
+
+            double bearing = 0.0;
+            if(lastDriverPosition != currentDriverPosition){
+              bearing = getBearing(lastDriverPosition, currentDriverPosition);
+            }
+
+            currentDrivers[index].bearing = bearing;
+
+          }else{
+
+            currentDrivers.removeWhere((driver) => driver.user_id == userId);
+
           }
 
-          currentDrivers[index].bearing = bearing;
-
         }else{
-          currentDrivers.add(driverLocation);
+          if(distMts<=3000){
+            currentDrivers.add(driverLocation);
+          }
         }
 
         displayActiveDriverOnUserMap();
@@ -498,7 +514,7 @@ class _UserHomeViewState extends State<UserHomeView> {
         } else if (state is GeolocationFailure) {
           return Center(child: Text('Error: ${state.error}'));
         } else {
-          getPosition();
+          //getPosition();
           return Center(child: Text('Awaiting Location...'));
         }
       }),
@@ -876,6 +892,7 @@ class _UserHomeViewState extends State<UserHomeView> {
             if(kDebugMode){
               print(responseObj[KKey.message] as String? ?? MSG.success);
             }
+            getPosition();
           }else{
             mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail, () { });
           }
@@ -1048,9 +1065,9 @@ class _UserHomeViewState extends State<UserHomeView> {
 
   Widget requestSentToDriver(){
     return Container(
-        height: MediaQuery.of(context).size.height * 0.5,
+        height: MediaQuery.of(context).size.height * 0.7,
         padding: const EdgeInsets.symmetric(
-            vertical: 5, horizontal: 5),
+            vertical: 0, horizontal: 5),
         decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.only(
@@ -1063,7 +1080,7 @@ class _UserHomeViewState extends State<UserHomeView> {
                   offset: Offset(0, -5))
             ]),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Container(
               padding: const EdgeInsets.symmetric(vertical: 15),
@@ -1083,8 +1100,13 @@ class _UserHomeViewState extends State<UserHomeView> {
               ),
               child: Column(
                 children: [
+                  lottie.Lottie.asset(
+                    "assets/animations/radar_animation.json",
+                    height: MediaQuery.of(context).size.height * 0.3,
+                    width: MediaQuery.of(context).size.width * 0.8,
+                  ),
                   Text(
-                    "${requestData["est_duration"] ?? ""} min",
+                    "${double.parse(requestData["est_duration"]).ceil() ?? "0"} min",
                     style: TextStyle(
                         color: TColor.primaryText,
                         fontSize: 25,
