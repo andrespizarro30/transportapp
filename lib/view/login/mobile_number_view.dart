@@ -6,6 +6,8 @@ import "package:transport_app/common/color_extension.dart";
 import "package:transport_app/common_widget/round_button.dart";
 import "package:transport_app/view/login/otp_view.dart";
 
+import "../../common/appLocalizations .dart";
+
 class MobileNumberView extends StatefulWidget {
   const MobileNumberView({super.key});
 
@@ -46,7 +48,7 @@ class _MobileNumberViewState extends State<MobileNumberView> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
 
-            Text("Ingrese numero celular", 
+            Text(AppLocalizations.of(context).translate('enter_phone_number'),
             style: TextStyle(
               color: TColor.primaryText,
               fontSize: 25,
@@ -112,7 +114,7 @@ class _MobileNumberViewState extends State<MobileNumberView> {
 
             const SizedBox(height: 8,),
 
-            Text("Al continuar, confirmo que he leido y estoy de acuerdo,", 
+            Text(AppLocalizations.of(context).translate('when_continuing_confirm_i_agree'),
             style: TextStyle(
               color: TColor.secondaryText,
               fontSize: 11,
@@ -123,7 +125,7 @@ class _MobileNumberViewState extends State<MobileNumberView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("Terminos y condiciones", 
+                Text(AppLocalizations.of(context).translate('terms_and_conditions'),
                 style: TextStyle(
                   color: TColor.primaryText,
                   fontSize: 11,
@@ -137,7 +139,7 @@ class _MobileNumberViewState extends State<MobileNumberView> {
                   fontWeight: FontWeight.w800            
                   ),
                 ),
-                Text("Poliza de privacidad", 
+                Text(AppLocalizations.of(context).translate('privacy_policies'),
                 style: TextStyle(
                   color: TColor.primaryText,
                   fontSize: 11,
@@ -149,13 +151,13 @@ class _MobileNumberViewState extends State<MobileNumberView> {
 
             const SizedBox(height: 15,),
 
-            RoundButton(title: "Login as Driver", onPressed: (){
+            RoundButton(title: AppLocalizations.of(context).translate('login_as_driver'), onPressed: (){
               context.push(OTPView(number: txtMobile.text, dialCode: countryCode.dialCode));
             }),
 
             const SizedBox(height: 15,),
 
-            RoundButton(title: "Login as User", onPressed: (){
+            RoundButton(title: AppLocalizations.of(context).translate('login_as_user'), onPressed: (){
               context.push(OTPView(number: txtMobile.text, dialCode: countryCode.dialCode, isDriver: false,));
             })
 

@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_app/common/common_extension.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/color_extension.dart';
 import '../../common/globs.dart';
 import '../../common/service_call.dart';
@@ -288,7 +289,7 @@ class _TipRequestViewState extends State<TipRequestView> with SingleTickerProvid
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        "ACEPTAR",
+                                        AppLocalizations.of(context).translate('ACCEPTING'),
                                         style: TextStyle(
                                             color: TColor.primaryTextW,
                                             fontSize: 14,
@@ -358,7 +359,7 @@ class _TipRequestViewState extends State<TipRequestView> with SingleTickerProvid
                                         Icon(Icons.close,size: 25,),
                                         SizedBox(width: 8,),
                                         Text(
-                                          "No gracias",
+                                          AppLocalizations.of(context).translate('no_thanks'),
                                           style: TextStyle(
                                               color: TColor.primaryText,
                                               fontSize: 18,
@@ -389,7 +390,7 @@ class _TipRequestViewState extends State<TipRequestView> with SingleTickerProvid
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
         infoWindow: InfoWindow(
           //title: address!.placeName,
-            snippet: "Partida"),
+            snippet: AppLocalizations.of(context).translate('starting_point')),
         position: origPos);
 
     Marker destLocationMarker = Marker(
@@ -397,7 +398,7 @@ class _TipRequestViewState extends State<TipRequestView> with SingleTickerProvid
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         infoWindow: InfoWindow(
           //title: result!.name!,
-            snippet: "Llegada"),
+            snippet: AppLocalizations.of(context).translate('arriving_point')),
         position: destPos);
 
     markersSet.clear();

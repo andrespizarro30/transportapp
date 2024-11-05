@@ -4,6 +4,8 @@ import "package:transport_app/common/color_extension.dart";
 import "package:transport_app/common_widget/round_button.dart";
 import "package:transport_app/view/login/mobile_number_view.dart";
 
+import "../../common/appLocalizations .dart";
+
 class WelcomeView extends StatefulWidget {
   const WelcomeView({super.key});
 
@@ -54,7 +56,7 @@ class _WelcomeViewState extends State<WelcomeView> {
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                  child: RoundButton(title: "GET STARTED", onPressed: (){
+                  child: RoundButton(title: AppLocalizations.of(context).translate('GET_STARTED'), onPressed: (){
                     context.push(const MobileNumberView());
                   }),
                 ),

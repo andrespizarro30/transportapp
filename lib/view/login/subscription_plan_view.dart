@@ -5,6 +5,8 @@ import "package:transport_app/common_widget/plan_row.dart";
 import "package:transport_app/common_widget/round_button.dart";
 import "package:transport_app/view/login/document_upload_view.dart";
 
+import "../../common/appLocalizations .dart";
+
 class SubscriptionPlanView extends StatefulWidget {
   const SubscriptionPlanView({super.key});
 
@@ -60,7 +62,7 @@ class _SubscriptionPlanViewState extends State<SubscriptionPlanView> {
         ),
         centerTitle: true,
 
-        title: Text("Plan de Suscripcion", 
+        title: Text(AppLocalizations.of(context).translate('subscription_plan'),
           style: TextStyle(
             color: TColor.primaryText,
             fontSize: 25,

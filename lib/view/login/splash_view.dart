@@ -49,7 +49,7 @@ class _SplashViewState extends State<SplashView> {
       }
 
     }else{
-      context.push(ChangeLanguageView(changeLanguage: widget.changeLanguage));
+      context.push(ChangeLanguageView(changeLanguage: widget.changeLanguage,closing: false,));
     }
   }
 

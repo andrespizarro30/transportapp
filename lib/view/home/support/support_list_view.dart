@@ -10,6 +10,7 @@ import 'package:transport_app/common/socket_manager.dart';
 import 'package:transport_app/common_widget/support_user_row.dart';
 import 'package:transport_app/view/home/support/support_message_view.dart';
 
+import '../../../common/appLocalizations .dart';
 import '../../../common/color_extension.dart';
 
 class SupportListView extends StatefulWidget {
@@ -81,7 +82,7 @@ class _SupportListViewState extends State<SupportListView> {
             icon: Image.asset("./assets/images/back.png",width: 25,height: 25,),
           ),
           centerTitle: true,
-          title: Text("Support",
+          title: Text(AppLocalizations.of(context).translate('support'),
             style: TextStyle(
                 color: TColor.primaryText,
                 fontSize: 18,

@@ -5,6 +5,8 @@ import "package:transport_app/common_widget/line_text_field.dart";
 import "package:transport_app/common_widget/round_button.dart";
 import "package:transport_app/view/login/bank_details_view.dart";
 
+import "../../common/appLocalizations .dart";
+
 class SignUpView extends StatefulWidget {
   const SignUpView({super.key});
 
@@ -59,7 +61,7 @@ class _SignUpViewState extends State<SignUpView> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
         
-              Text("Registrarse", 
+              Text(AppLocalizations.of(context).translate('registering'),
               style: TextStyle(
                 color: TColor.primaryText,
                 fontSize: 25,
@@ -70,8 +72,8 @@ class _SignUpViewState extends State<SignUpView> {
               const SizedBox(height: 30,),
         
               LineTextField(
-                title: "Nombre", 
-                hintText: "Ingrese su nombre", 
+                title: AppLocalizations.of(context).translate('name'),
+                hintText: AppLocalizations.of(context).translate('enter_name'),
                 controller: txtName, 
                 keyboardType: TextInputType.name
               ),
@@ -79,8 +81,8 @@ class _SignUpViewState extends State<SignUpView> {
               const SizedBox(height: 10,),
         
               LineTextField(
-                title: "Apellido", 
-                hintText: "Ingrese su apellido", 
+                title: AppLocalizations.of(context).translate('last_name'),
+                hintText: AppLocalizations.of(context).translate('enter_last_name'),
                 controller: txtLastName, 
                 keyboardType: TextInputType.name, 
               ),
@@ -88,8 +90,8 @@ class _SignUpViewState extends State<SignUpView> {
               const SizedBox(height: 10,),
         
               LineTextField(
-                title: "E-mail", 
-                hintText: "Ingrese su e-mail", 
+                title: AppLocalizations.of(context).translate('e_mail'),
+                hintText: AppLocalizations.of(context).translate('enter_your_e_mail'),
                 controller: txtEmail, 
                 keyboardType: TextInputType.emailAddress, 
               ),
@@ -151,7 +153,7 @@ class _SignUpViewState extends State<SignUpView> {
               const SizedBox(height: 8),
         
               LineTextField(
-                title: "Password", 
+                title: AppLocalizations.of(context).translate('password'),
                 hintText: "******", 
                 controller: txtPassword, 
                 keyboardType: TextInputType.phone, 
@@ -166,7 +168,7 @@ class _SignUpViewState extends State<SignUpView> {
         
               const SizedBox(height: 8),
 
-              Text("Al continuar, confirmo que he leido y estoy de acuerdo,", 
+              Text(AppLocalizations.of(context).translate('when_continuing_confirm_i_agree'),
               style: TextStyle(
                 color: TColor.secondaryText,
                 fontSize: 11,
@@ -177,7 +179,7 @@ class _SignUpViewState extends State<SignUpView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Terminos y condiciones", 
+                  Text(AppLocalizations.of(context).translate('terms_and_conditions'),
                   style: TextStyle(
                     color: TColor.primaryText,
                     fontSize: 11,
@@ -191,7 +193,7 @@ class _SignUpViewState extends State<SignUpView> {
                     fontWeight: FontWeight.w800            
                     ),
                   ),
-                  Text("Poliza de privacidad", 
+                  Text(AppLocalizations.of(context).translate('privacy_policies'),
                   style: TextStyle(
                     color: TColor.primaryText,
                     fontSize: 11,
@@ -203,7 +205,7 @@ class _SignUpViewState extends State<SignUpView> {
 
               const SizedBox(height: 15,),
         
-              RoundButton(title: "Registrarse", onPressed: (){
+              RoundButton(title: AppLocalizations.of(context).translate('registering'), onPressed: (){
                 context.push(const BankDetailsView());
               })
               

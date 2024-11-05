@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:transport_app/common/color_extension.dart';
+import 'package:transport_app/common/common_extension.dart';
 import 'package:transport_app/common/service_call.dart';
 import 'package:transport_app/common_widget/icon_title.dart';
 import 'package:transport_app/common_widget/menu_row.dart';
@@ -18,13 +20,29 @@ import '../../common/appLocalizations .dart';
 import '../../common/globs.dart';
 
 class MenuView extends StatefulWidget {
-  const MenuView({super.key});
+
+  final Map user_data;
+
+  const MenuView({super.key, required this.user_data});
 
   @override
   State<MenuView> createState() => _MenuViewState();
 }
 
 class _MenuViewState extends State<MenuView> {
+
+  Map user_data = {};
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    user_data = widget.user_data;
+
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +74,7 @@ class _MenuViewState extends State<MenuView> {
                           children: [
                             Icon(Icons.question_mark, size: 30, color: TColor.bg,),
                             Text(
-                              "Help",
+                              AppLocalizations.of(context).translate('help'),
                               style: TextStyle(
                                   color: TColor.primaryTextW,
                                   fontSize: 14,
@@ -73,7 +91,7 @@ class _MenuViewState extends State<MenuView> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         IconTitle(
-                            title: "Earnings",
+                            title: AppLocalizations.of(context).translate('earnings'),
                             icon: "./assets/images/earnings.png",
                             onPress: (){
                               if(ServiceCall.userType == 1){
@@ -99,36 +117,44 @@ class _MenuViewState extends State<MenuView> {
                                   children: [
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(50),
-                                      child: Image.asset(
-                                        "assets/images/u1.png",
+                                      child: CachedNetworkImage(
+                                        imageUrl: user_data["image"] as String? ?? "",
                                         width: 100,
                                         height: 100,
+                                        fit: BoxFit.contain,
+                                        placeholder: (context, url) => Center(
+                                          child: Image.asset(
+                                            "assets/images/u1.png",
+                                            width: 100,
+                                            height: 100,
+                                          ) // Loading indicator
+                                        ),
                                       ),
                                     ),
-                                    Container(
-                                      height: 30,
-                                      padding: const EdgeInsets.symmetric(vertical: 4,horizontal: 8),
-                                      color: TColor.bg,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Image.asset("assets/images/rate.png",width: 15,height: 15,),
-                                          SizedBox(width: 4,),
-                                          Text(
-                                            "4.89",
-                                            style: TextStyle(
-                                                color: TColor.primaryText,
-                                                fontSize: 13
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
+                                    // Container(
+                                    //   height: 30,
+                                    //   padding: const EdgeInsets.symmetric(vertical: 4,horizontal: 8),
+                                    //   color: TColor.bg,
+                                    //   child: Row(
+                                    //     mainAxisSize: MainAxisSize.min,
+                                    //     children: [
+                                    //       Image.asset("assets/images/rate.png",width: 15,height: 15,),
+                                    //       SizedBox(width: 4,),
+                                    //       Text(
+                                    //         "4.89",
+                                    //         style: TextStyle(
+                                    //             color: TColor.primaryText,
+                                    //             fontSize: 13
+                                    //         ),
+                                    //       )
+                                    //     ],
+                                    //   ),
+                                    // ),
                                   ],
                                 ),
                                 SizedBox(height: 4,),
                                 Text(
-                                  "Andres Pizarro",
+                                  user_data["name"] as String? ?? "",
                                   style: TextStyle(
                                       color: TColor.primaryTextW,
                                       fontSize: 16
@@ -139,10 +165,13 @@ class _MenuViewState extends State<MenuView> {
                           ),
                         ),
                         IconTitle(
-                            title: "Wallet",
+                            title: AppLocalizations.of(context).translate('wallet'),
                             icon: "./assets/images/wallet.png",
                             onPress: (){
-                              context.push(const WalletView());
+                              //context.push(const WalletView());
+                              mdShowAlert(Globs.appName, AppLocalizations.of(context).translate('soon'), () {
+
+                              });
                             }
                         )
                       ],
@@ -152,48 +181,48 @@ class _MenuViewState extends State<MenuView> {
               )
             ),
           ),
-          InkWell(
-            onTap: (){
-              context.push(const ServiceTypeView());
-            },
-            child: Container(
-              color: TColor.lightGray.withOpacity(0.4),
-              padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 20),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  SizedBox(width: 25),
-                  Image.asset("./assets/images/car.png",width: 30,height: 30,),
-                  SizedBox(width: 25),
-                  Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Swith Service type",
-                            style: TextStyle(
-                                color: TColor.primaryText,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700
-                            ),
-                          ),
-                          Text(
-                            "Change your service type",
-                            style: TextStyle(
-                                color: TColor.primaryText,
-                                fontSize: 13
-                            ),
-                          )
-                        ],
-                      )
-                  ),
-                  SizedBox(width: 8,),
-                  Icon(Icons.navigate_next,size: 30,)
-                ],
-              ),
-            ),
-          ),
+          // InkWell(
+          //   onTap: (){
+          //     context.push(const ServiceTypeView());
+          //   },
+          //   child: Container(
+          //     color: TColor.lightGray.withOpacity(0.4),
+          //     padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 20),
+          //     child: Row(
+          //       crossAxisAlignment: CrossAxisAlignment.center,
+          //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //       children: [
+          //         SizedBox(width: 25),
+          //         Image.asset("./assets/images/car.png",width: 30,height: 30,),
+          //         SizedBox(width: 25),
+          //         Expanded(
+          //             child: Column(
+          //               crossAxisAlignment: CrossAxisAlignment.start,
+          //               children: [
+          //                 Text(
+          //                   "Swith Service type",
+          //                   style: TextStyle(
+          //                       color: TColor.primaryText,
+          //                       fontSize: 18,
+          //                       fontWeight: FontWeight.w700
+          //                   ),
+          //                 ),
+          //                 Text(
+          //                   "Change your service type",
+          //                   style: TextStyle(
+          //                       color: TColor.primaryText,
+          //                       fontSize: 13
+          //                   ),
+          //                 )
+          //               ],
+          //             )
+          //         ),
+          //         SizedBox(width: 8,),
+          //         Icon(Icons.navigate_next,size: 30,)
+          //       ],
+          //     ),
+          //   ),
+          // ),
           Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -211,16 +240,16 @@ class _MenuViewState extends State<MenuView> {
                     MenuRow(title: AppLocalizations.of(context).translate('summary'), icon: "./assets/images/summary.png", onPress: (){
                       context.push(const SummaryView());
                     }),
-                    MenuRow(title: "My Subscription", icon: "./assets/images/my_subscription.png", onPress: (){
-                
-                    }),
-                    MenuRow(title: "Notifications", icon: "./assets/images/notification.png", onPress: (){
-                
-                    }),
-                    MenuRow(title: "Settings", icon: "./assets/images/settings.png", onPress: (){
+                    // MenuRow(title: "My Subscription", icon: "./assets/images/my_subscription.png", onPress: (){
+                    //
+                    // }),
+                    // MenuRow(title: "Notifications", icon: "./assets/images/notification.png", onPress: (){
+                    //
+                    // }),
+                    MenuRow(title: AppLocalizations.of(context).translate('settings'), icon: "./assets/images/settings.png", onPress: (){
                       context.push(const SettingsView());
                     }),
-                    MenuRow(title: "Logout", icon: "./assets/images/logout.png", onPress: (){
+                    MenuRow(title: AppLocalizations.of(context).translate('logout'), icon: "./assets/images/logout.png", onPress: (){
                       Globs.udBoolSet(false, Globs.userLogin);
                       Globs.udSet({}, Globs.userPayload);
                       Navigator.pushAndRemoveUntil(
@@ -238,4 +267,5 @@ class _MenuViewState extends State<MenuView> {
       ),
     );
   }
+
 }

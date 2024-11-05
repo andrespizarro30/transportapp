@@ -36,7 +36,7 @@ class GeolocationBloc extends Bloc<GeolocationEvent, GeolocationState>{
 
       Stream<Position> positionStream = Geolocator.getPositionStream(
         locationSettings: LocationSettings(
-            accuracy: LocationAccuracy.bestForNavigation,
+            accuracy: LocationAccuracy.best,
             distanceFilter: 10,
             timeLimit: Duration(milliseconds: 60000000)
         ),

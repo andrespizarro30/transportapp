@@ -10,6 +10,7 @@ import 'package:transport_app/view/menu/my_profile_view.dart';
 import 'package:transport_app/view/menu/my_vehicle_view.dart';
 
 import '../../common/color_extension.dart';
+import '../login/change_language.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
@@ -63,6 +64,9 @@ class _SettingsViewState extends State<SettingsView> {
               SettingRow(title: "Change Password", icon: "./assets/images/sm_password.png", onPressed: (){
                 context.push(const ChangePasswordView());
               }),
+              SettingRow(title: "Change Language", icon: "./assets/images/language.png", onPressed: (){
+                context.push(ChangeLanguageView(changeLanguage: _changeLanguage,closing: true,));
+              }),
               const SizedBox(height: 15,),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -94,5 +98,9 @@ class _SettingsViewState extends State<SettingsView> {
         ),
       ),
     );
+  }
+
+  void _changeLanguage(String languageCode) async {
+
   }
 }

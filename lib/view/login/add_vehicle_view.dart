@@ -9,6 +9,7 @@ import "package:transport_app/common_widget/drop_down_button.dart";
 import "package:transport_app/common_widget/line_text_field.dart";
 import "package:transport_app/common_widget/round_button.dart";
 
+import "../../common/appLocalizations .dart";
 import "../../common_widget/image_picker_view.dart";
 import "../../common_widget/popup_layout.dart";
 
@@ -69,7 +70,7 @@ class _AddVehicleViewState extends State<AddVehicleView> {
         ),
         centerTitle: true,
 
-        title: Text("Vehiculo",
+        title: Text(AppLocalizations.of(context).translate('vehicle'),
           style: TextStyle(
             color: TColor.primaryText,
             fontSize: 25,
@@ -87,8 +88,8 @@ class _AddVehicleViewState extends State<AddVehicleView> {
               const SizedBox(height: 30,),
 
               LineDropDownButton(
-                  title: "Marca",
-                  hintText: "Seleccione MARCA",
+                  title: AppLocalizations.of(context).translate('brand'),
+                  hintText: AppLocalizations.of(context).translate('select_brand'),
                   didChange: (bObj){
 
                     selectBrandObj = bObj;
@@ -111,7 +112,7 @@ class _AddVehicleViewState extends State<AddVehicleView> {
 
               if((selectBrandObj?["brand_id"] as int? ?? -1)==0)
                 LineTextField(
-                  title: "Marca",
+                  title: AppLocalizations.of(context).translate('brand'),
                   hintText: "Ej: Kia, Chevrolet, etc",
                   controller: txtBrandName,
                   keyboardType: TextInputType.name,
@@ -122,8 +123,8 @@ class _AddVehicleViewState extends State<AddVehicleView> {
               if((selectBrandObj?["brand_id"] as int? ?? -1)!=0)
 
                 LineDropDownButton(
-                    title: "Modelo",
-                    hintText: "Seleccione modelo",
+                    title: AppLocalizations.of(context).translate('model'),
+                    hintText: AppLocalizations.of(context).translate('select_model'),
                     didChange: (mObj){
 
                       selectModelObj = mObj;
@@ -145,7 +146,7 @@ class _AddVehicleViewState extends State<AddVehicleView> {
 
               if((selectBrandObj?["brand_id"] as int? ?? -1)==0 || (selectModelObj?["model_id"] as int? ?? -1)==0)
                 LineTextField(
-                  title: "Modelo",
+                  title: AppLocalizations.of(context).translate('model'),
                   hintText: "Ej: Picanto, Spark",
                   controller: txtModelName,
                   keyboardType: TextInputType.name,
@@ -155,8 +156,8 @@ class _AddVehicleViewState extends State<AddVehicleView> {
 
               if(!((selectBrandObj?["brand_id"] as int? ?? -1)==0 || (selectModelObj?["model_id"] as int? ?? -1)==0))
                 LineDropDownButton(
-                    title: "Series",
-                    hintText: "Seleccione serie",
+                    title: AppLocalizations.of(context).translate('series'),
+                    hintText: AppLocalizations.of(context).translate('select_series'),
                     didChange: (sObj){
                       selectSeriesObj = sObj;
 
@@ -177,8 +178,8 @@ class _AddVehicleViewState extends State<AddVehicleView> {
                   (selectSeriesObj?["series_id"] as int? ?? -1)==0
               )
                 LineTextField(
-                    title: "Series",
-                    hintText: "Otra referencia del vehiculo",
+                    title: AppLocalizations.of(context).translate('series'),
+                    hintText: AppLocalizations.of(context).translate('another_vehicle_reference'),
                     controller: txtSeries,
                     keyboardType: TextInputType.name
                 ),
@@ -186,8 +187,8 @@ class _AddVehicleViewState extends State<AddVehicleView> {
               const SizedBox(height: 10,),
 
               LineTextField(
-                  title: "Seat",
-                  hintText: "Numero de asiento disponibles",
+                  title: AppLocalizations.of(context).translate('seat'),
+                  hintText: AppLocalizations.of(context).translate('no_available_seats'),
                   controller: txtSeat,
                   keyboardType: TextInputType.name
               ),
@@ -195,7 +196,7 @@ class _AddVehicleViewState extends State<AddVehicleView> {
               const SizedBox(height: 10),
 
               LineTextField(
-                title: "Placa", 
+                title: AppLocalizations.of(context).translate('plate_number'),
                 hintText: "Ej: ABC123",
                 controller: txtNumberPlate,
                 keyboardType: TextInputType.name
@@ -237,7 +238,7 @@ class _AddVehicleViewState extends State<AddVehicleView> {
         
               Padding(
                 padding: const EdgeInsets.only(bottom: 30),
-                child: RoundButton(title: "Registrar", onPressed: submitCarAction),
+                child: RoundButton(title: AppLocalizations.of(context).translate('registering'), onPressed: submitCarAction),
               )
             ],
           ),
@@ -249,47 +250,47 @@ class _AddVehicleViewState extends State<AddVehicleView> {
 
   void submitCarAction(){
     if(selectBrandObj == null){
-      mdShowAlert("Error", "Please select a car brand", () { });
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_select_car_brand'), () { });
       return;
     }
 
     if(otherFlag==1 && txtBrandName.text.isEmpty){
-      mdShowAlert("Error", "Please enter a brand name", () { });
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_enter_brand_name'), () { });
       return;
     }
 
     if(otherFlag > 1 && selectModelObj == null){
-      mdShowAlert("Error", "Please select a car model", () { });
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_select_car_model'), () { });
       return;
     }
 
     if(otherFlag > 0 && otherFlag<=2 && txtModelName.text.isEmpty){
-      mdShowAlert("Error", "Please enter a model name", () { });
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_enter_model_name'), () { });
       return;
     }
 
     if(otherFlag > 2 && selectSeriesObj == null){
-      mdShowAlert("Error", "Please select a car series", () { });
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_select_car_series'), () { });
       return;
     }
 
     if(otherFlag > 0 && otherFlag<=3 && txtSeries.text.isEmpty){
-      mdShowAlert("Error", "Please enter a series name", () { });
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_enter_series_name'), () { });
       return;
     }
 
     if(txtSeat.text.isEmpty){
-      mdShowAlert("Error", "Please enter number of seats", () { });
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_enter_seats_number'), () { });
       return;
     }
 
     if(txtNumberPlate.text.isEmpty){
-      mdShowAlert("Error", "Please enter car plate", () { });
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_enter_car_plate'), () { });
       return;
     }
 
     if(selectImage == null){
-      mdShowAlert("Error", "Please take or select car image", () { });
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_take_or_select_car_image'), () { });
       return;
     }
 
@@ -351,7 +352,7 @@ class _AddVehicleViewState extends State<AddVehicleView> {
         },
         failure: (err) async{
           Globs.hideHUD();
-          mdShowAlert("Error", err,(){});
+          mdShowAlert(AppLocalizations.of(context).translate('error'), err,(){});
         }
     );
 
@@ -375,7 +376,7 @@ class _AddVehicleViewState extends State<AddVehicleView> {
         },
         failure: (err) async{
           Globs.hideHUD();
-          mdShowAlert("Error", err,(){});
+          mdShowAlert(AppLocalizations.of(context).translate('error'), err,(){});
         }
     );
 
@@ -391,16 +392,16 @@ class _AddVehicleViewState extends State<AddVehicleView> {
         withSuccess: (responseObj) async{
           Globs.hideHUD();
           if((responseObj[KKey.status] ?? "")=="1"){
-            mdShowAlert("Success",responseObj[KKey.message] ?? MSG.success,(){
+            mdShowAlert(AppLocalizations.of(context).translate('success'),responseObj[KKey.message] ?? MSG.success,(){
               context.pop();
             });
           }else{
-            mdShowAlert("Error",responseObj[KKey.message] ?? MSG.fail,(){});
+            mdShowAlert(AppLocalizations.of(context).translate('error'),responseObj[KKey.message] ?? MSG.fail,(){});
           }
         },
         failure: (err) async{
           Globs.hideHUD();
-          mdShowAlert("Error", err,(){});
+          mdShowAlert(AppLocalizations.of(context).translate('error'), err,(){});
         }
     );
   }

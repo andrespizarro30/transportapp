@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -87,6 +88,8 @@ class _UserHomeViewState extends State<UserHomeView> {
   bool isRequestingService = false;
   Map<String,dynamic> requestData = {};
 
+  Map user_data = {};
+
   @override
   void initState() {
     // TODO: implement initState
@@ -95,6 +98,8 @@ class _UserHomeViewState extends State<UserHomeView> {
     changeLocation();
 
     initNotificationService();
+
+    getUserData();
 
     SocketManager.shared.socket?.on("user_request_accept", (data) {
       if (data[KKey.status] == "1") {
@@ -458,7 +463,7 @@ class _UserHomeViewState extends State<UserHomeView> {
                                 children: [
                                   InkWell(
                                     onTap: () {
-                                      context.push(const MenuView());
+                                      context.push(MenuView(user_data: user_data,));
                                     },
                                     child: Container(
                                       margin: EdgeInsets.only(left: 10),
@@ -475,30 +480,39 @@ class _UserHomeViewState extends State<UserHomeView> {
                                       child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(30),
-                                          child: Image.asset(
-                                            "assets/images/u1.png",
+                                          child: CachedNetworkImage(
+                                            imageUrl: user_data["image"] as String? ?? "",
                                             width: 40,
                                             height: 40,
-                                          )),
+                                            fit: BoxFit.contain,
+                                            placeholder: (context, url) => Center(
+                                                child: Image.asset(
+                                                  "assets/images/u1.png",
+                                                  width: 40,
+                                                  height: 40,
+                                                ) // Loading indicator
+                                            ),
+                                          )
+                                      ),
                                     ),
                                   ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 1),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    constraints:
-                                        const BoxConstraints(minWidth: 15),
-                                    child: Text(
-                                      "3",
-                                      style: TextStyle(
-                                          color: TColor.bg,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w800),
-                                    ),
-                                  )
+                                  // Container(
+                                  //   padding: const EdgeInsets.symmetric(
+                                  //       horizontal: 8, vertical: 1),
+                                  //   decoration: BoxDecoration(
+                                  //     color: Colors.red,
+                                  //     borderRadius: BorderRadius.circular(30),
+                                  //   ),
+                                  //   constraints:
+                                  //       const BoxConstraints(minWidth: 15),
+                                  //   child: Text(
+                                  //     "3",
+                                  //     style: TextStyle(
+                                  //         color: TColor.bg,
+                                  //         fontSize: 10,
+                                  //         fontWeight: FontWeight.w800),
+                                  //   ),
+                                  // )
                                 ],
                               ),
                             )
@@ -1230,6 +1244,30 @@ class _UserHomeViewState extends State<UserHomeView> {
             )
           ],
         )
+    );
+  }
+
+  void getUserData(){
+    Globs.showHUD();
+
+    ServiceCall.post(
+        {},
+        isTokenApi: true,
+        SVKey.svGetProfileData,
+        withSuccess: (responseObj) async{
+          Globs.hideHUD();
+          if((responseObj[KKey.status] as String? ?? "") == "1"){
+            user_data = responseObj[KKey.payload] as Map? ?? {};
+          }else{
+            user_data = {};
+          }
+          setState(() {
+
+          });
+        },
+        failure: (err) async{
+          Globs.hideHUD();
+        }
     );
   }
 

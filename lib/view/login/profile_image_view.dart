@@ -14,6 +14,8 @@ import 'package:http/http.dart' as http;
 import "package:transport_app/view/login/driver_edit_profile_view.dart";
 import "package:transport_app/view/menu/edit_profile_view.dart";
 
+import "../../common/appLocalizations .dart";
+
 class ProfileImageView extends StatefulWidget {
 
   final bool showBack;
@@ -70,7 +72,7 @@ class _ProfileImageViewState extends State<ProfileImageView> {
         ): null,
         centerTitle: true,
 
-        title: Text("Profile Image",
+        title: Text(AppLocalizations.of(context).translate('profile_image'),
           style: TextStyle(
               color: TColor.primaryText,
               fontSize: 25,
@@ -118,7 +120,7 @@ class _ProfileImageViewState extends State<ProfileImageView> {
               const SizedBox(height: 50,),
 
               RoundButton(
-                title: "NEXT",
+                title: AppLocalizations.of(context).translate('next'),
                 onPressed: (){
                   if(ServiceCall.userType == 2){
                     context.push(const DriverEditProfileView());
@@ -151,12 +153,12 @@ class _ProfileImageViewState extends State<ProfileImageView> {
             mdShowAlert("",responseObj[KKey.message] ?? MSG.success,(){});
           }else{
             Globs.hideHUD();
-            mdShowAlert("Error",responseObj[KKey.message] ?? MSG.fail,(){});
+            mdShowAlert(AppLocalizations.of(context).translate('error'),responseObj[KKey.message] ?? MSG.fail,(){});
           }
         },
         failure: (err) async{
           Globs.hideHUD();
-          mdShowAlert("Error", err,(){});
+          mdShowAlert(AppLocalizations.of(context).translate('error'), err,(){});
         }
     );
   }

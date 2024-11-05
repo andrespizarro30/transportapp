@@ -7,6 +7,8 @@ import "package:transport_app/common_widget/line_text_field.dart";
 import "package:transport_app/common_widget/round_button.dart";
 import "package:transport_app/view/login/document_upload_view.dart";
 
+import "../../common/appLocalizations .dart";
+
 class BankDetailsView extends StatefulWidget {
   const BankDetailsView({super.key});
 
@@ -49,7 +51,7 @@ class _BankDetailsViewState extends State<BankDetailsView> {
         ),
         centerTitle: true,
 
-        title: Text("Datos de pago", 
+        title: Text(AppLocalizations.of(context).translate('data_payment'),
           style: TextStyle(
             color: TColor.primaryText,
             fontSize: 25,
@@ -67,7 +69,7 @@ class _BankDetailsViewState extends State<BankDetailsView> {
               const SizedBox(height: 30,),
         
               LineTextField(
-                title: "Medio de pago", 
+                title: AppLocalizations.of(context).translate('payment_method'),
                 hintText: "Ej: Nequi", 
                 controller: txtBankName, 
                 keyboardType: TextInputType.name
@@ -76,8 +78,8 @@ class _BankDetailsViewState extends State<BankDetailsView> {
               const SizedBox(height: 10,),
         
               LineTextField(
-                title: "Nombre del titular", 
-                hintText: "Ingrese su nombre y apellido", 
+                title: AppLocalizations.of(context).translate('holder_name'),
+                hintText: AppLocalizations.of(context).translate('enter_name_and_last_name'),
                 controller: txtAccountHolderName, 
                 keyboardType: TextInputType.name, 
               ),
@@ -85,8 +87,8 @@ class _BankDetailsViewState extends State<BankDetailsView> {
               const SizedBox(height: 10,),
         
               LineTextField(
-                title: "Numero de cuenta", 
-                hintText: "# cuenta de pago", 
+                title: AppLocalizations.of(context).translate('account_number'),
+                hintText: AppLocalizations.of(context).translate('num_account'),
                 controller: txtAccountNumber, 
                 keyboardType: TextInputType.number, 
               ),
@@ -94,15 +96,15 @@ class _BankDetailsViewState extends State<BankDetailsView> {
               const SizedBox(height: 10,),
         
               LineTextField(
-                title: "Codigo del Banco",
-                hintText: "Codigo (Si aplica)",
+                title: AppLocalizations.of(context).translate('bank_code'),
+                hintText: AppLocalizations.of(context).translate('code_if_applies'),
                 controller: txtSwiftCode,
                 keyboardType: TextInputType.number
               ),
         
               const SizedBox(height: 8),
 
-              Text("Al continuar, confirmo que he leido y estoy de acuerdo,", 
+              Text(AppLocalizations.of(context).translate('when_continuing_confirm_i_agree'),
               style: TextStyle(
                 color: TColor.secondaryText,
                 fontSize: 11,
@@ -113,7 +115,7 @@ class _BankDetailsViewState extends State<BankDetailsView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Terminos y condiciones", 
+                  Text(AppLocalizations.of(context).translate('terms_and_conditions'),
                   style: TextStyle(
                     color: TColor.primaryText,
                     fontSize: 11,
@@ -127,7 +129,7 @@ class _BankDetailsViewState extends State<BankDetailsView> {
                     fontWeight: FontWeight.w800            
                     ),
                   ),
-                  Text("Poliza de privacidad", 
+                  Text(AppLocalizations.of(context).translate('privacy_policies'),
                   style: TextStyle(
                     color: TColor.primaryText,
                     fontSize: 11,
@@ -139,7 +141,7 @@ class _BankDetailsViewState extends State<BankDetailsView> {
 
               const SizedBox(height: 15,),
         
-              RoundButton(title: "Siguiente", onPressed: (){
+              RoundButton(title: AppLocalizations.of(context).translate('next'), onPressed: (){
                 //context.push(const DocumentUploadView(title: "Documentos"));
                 updateAction();
               })
@@ -156,17 +158,17 @@ class _BankDetailsViewState extends State<BankDetailsView> {
   void updateAction(){
 
     if(txtBankName.text.isEmpty){
-      mdShowAlert("Error", "Please enter bank name", () {});
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_enter_bank_name'), () {});
       return;
     }
 
     if(txtAccountNumber.text.isEmpty){
-      mdShowAlert("Error", "Please enter account number", () {});
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_enter_account_number'), () {});
       return;
     }
 
     if(txtAccountHolderName.text.isEmpty){
-      mdShowAlert("Error", "Please enter account holder name", () {});
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_enter_account_holder_name'), () {});
       return;
     }
 
@@ -197,12 +199,12 @@ class _BankDetailsViewState extends State<BankDetailsView> {
           txtSwiftCode.text = payload["bsb"] as String? ?? "";
         });
       }else{
-        mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail, () {});
+        mdShowAlert(AppLocalizations.of(context).translate('error'), responseObj[KKey.message] as String? ?? MSG.fail, () {});
       }
     },
     failure: (err)async {
       Globs.hideHUD();
-      mdShowAlert("Error", err,(){});
+      mdShowAlert(AppLocalizations.of(context).translate('error'), err,(){});
     }
     );
   }
@@ -224,14 +226,14 @@ class _BankDetailsViewState extends State<BankDetailsView> {
               txtBankName.text = payload["bank_name"] as String? ?? "";
               txtSwiftCode.text = payload["bsb"] as String? ?? "";
             });
-            mdShowAlert("Success", responseObj[KKey.message] as String? ?? MSG.success, () {});
+            mdShowAlert(AppLocalizations.of(context).translate('success'), responseObj[KKey.message] as String? ?? MSG.success, () {});
           }else{
-            mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail, () {});
+            mdShowAlert(AppLocalizations.of(context).translate('error'), responseObj[KKey.message] as String? ?? MSG.fail, () {});
           }
         },
         failure: (err)async {
           Globs.hideHUD();
-          mdShowAlert("Error", err,(){});
+          mdShowAlert(AppLocalizations.of(context).translate('error'), err,(){});
         }
     );
 

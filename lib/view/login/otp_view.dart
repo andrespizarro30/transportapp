@@ -13,6 +13,8 @@ import "package:transport_app/view/home/home_view.dart";
 import "package:transport_app/view/login/profile_image_view.dart";
 import "package:transport_app/view/user/user_home_view.dart";
 
+import "../../common/appLocalizations .dart";
+
 class OTPView extends StatefulWidget {
 
   final bool isDriver;
@@ -48,7 +50,7 @@ class _OTPViewState extends State<OTPView> {
             await auth.signInWithCredential(credential);
           },
           verificationFailed: (error) {
-            mdShowAlert("Fail", error.toString(), () {});
+            mdShowAlert(AppLocalizations.of(context).translate('fail'), error.toString(), () {});
           },
           codeSent: (verificationId, forceResendingToken) {
             this.verificationId = verificationId;
@@ -57,13 +59,13 @@ class _OTPViewState extends State<OTPView> {
             this.verificationId = verificationId;
           });
     } catch (error) {
-      mdShowAlert("Fail", error.toString(), () {});
+      mdShowAlert(AppLocalizations.of(context).translate('error'), error.toString(), () {});
     }
   }
 
   void smsVerification() async {
     if (otpCode.length < 6) {
-      mdShowAlert("Error", "Please enter a valid code", () {});
+      mdShowAlert(AppLocalizations.of(context).translate('fail'), AppLocalizations.of(context).translate('please_enter_a_valid_code'), () {});
       return;
     }
 
@@ -74,10 +76,10 @@ class _OTPViewState extends State<OTPView> {
       if (user != null) {
         submitApiData(user.uid);
       } else {
-        mdShowAlert("Fail", "Invalid code", () {});
+        mdShowAlert(AppLocalizations.of(context).translate('fail'), AppLocalizations.of(context).translate('invalid_code'), () {});
       }
     } catch (error) {
-      mdShowAlert("Fail", error.toString(), () {});
+      mdShowAlert(AppLocalizations.of(context).translate('fail'), error.toString(), () {});
     }
   }
 
@@ -102,7 +104,7 @@ class _OTPViewState extends State<OTPView> {
           }else
           if(state is LoginApiResultState){
             Globs.hideHUD();
-            mdShowAlert("Success", "Successfully signed in api call", () {});
+            mdShowAlert(AppLocalizations.of(context).translate('success'), AppLocalizations.of(context).translate('successfully_signed'), () {});
 
             if(ServiceCall.userType == 1){
               if(ServiceCall.userObj[KKey.status] == 1 && ServiceCall.userObj["name"] != ""){
@@ -120,11 +122,11 @@ class _OTPViewState extends State<OTPView> {
           }else
           if(state is LoginErrortState){
             Globs.hideHUD();
-            mdShowAlert("Fail", state.errorMSG, () {});
+            mdShowAlert(AppLocalizations.of(context).translate('fail'), state.errorMSG, () {});
           }else
           if(state is TokenState){
             Globs.hideHUD();
-            mdShowAlert("Token", state.token, () {});
+            mdShowAlert(AppLocalizations.of(context).translate('token'), state.token, () {});
           }
         },
         builder: (context, state) {
@@ -134,7 +136,7 @@ class _OTPViewState extends State<OTPView> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "Código de verificación",
+                  AppLocalizations.of(context).translate('verification_code'),
                   style: TextStyle(
                       color: TColor.primaryText,
                       fontSize: 25,
@@ -144,7 +146,7 @@ class _OTPViewState extends State<OTPView> {
                   height: 30,
                 ),
                 Text(
-                  "Ingrese los 6 digitos del codigo recibido",
+                  AppLocalizations.of(context).translate('insert_six_digits_of_received_code'),
                   style: TextStyle(
                       color: TColor.secondaryText,
                       fontSize: 14,
@@ -171,7 +173,7 @@ class _OTPViewState extends State<OTPView> {
                           context.pop();
                         },
                         child: Text(
-                          "Editar",
+                          AppLocalizations.of(context).translate('editing'),
                           style:
                               TextStyle(color: TColor.secondary, fontSize: 16),
                         ))
@@ -192,7 +194,7 @@ class _OTPViewState extends State<OTPView> {
                 ),
                 const SizedBox(height: 15),
                 RoundButton(
-                    title: "Enviar",
+                    title: AppLocalizations.of(context).translate('sending'),
                     onPressed: () {
                       smsVerification();
                     }),
@@ -202,8 +204,8 @@ class _OTPViewState extends State<OTPView> {
                     onPressed: () {
                       onSendSms();
                     },
-                    text: const Text(
-                      "Reenviar codigo",
+                    text: Text(
+                      AppLocalizations.of(context).translate('resend_code'),
                       style: TextStyle(fontSize: 16),
                     ),
                     buttonType: ButtonType.text_button,

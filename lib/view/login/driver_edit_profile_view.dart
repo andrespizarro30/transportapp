@@ -9,6 +9,7 @@ import "package:transport_app/common/service_call.dart";
 import "package:transport_app/common_widget/line_text_field.dart";
 import "package:transport_app/common_widget/round_button.dart";
 
+import "../../common/appLocalizations .dart";
 import "../../common/globs.dart";
 import "../../common_widget/drop_down_button.dart";
 import "../home/home_view.dart";
@@ -81,7 +82,7 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
 
-              Text("Edit profile",
+              Text(AppLocalizations.of(context).translate('edit_profile'),
                 style: TextStyle(
                     color: TColor.primaryText,
                     fontSize: 25,
@@ -92,8 +93,8 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
               const SizedBox(height: 30,),
 
               LineTextField(
-                  title: "Nombre",
-                  hintText: "Ingrese su nombre",
+                  title: AppLocalizations.of(context).translate('name'),
+                  hintText: AppLocalizations.of(context).translate('enter_name'),
                   controller: txtName,
                   keyboardType: TextInputType.name
               ),
@@ -120,7 +121,7 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
                           )
                       ),
                       Text(
-                        "Male",
+                        AppLocalizations.of(context).translate('male'),
                         style: TextStyle(color: TColor.placeholder,fontSize: 14),
                       )
                     ],
@@ -144,7 +145,7 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
                           )
                       ),
                       Text(
-                        "Female",
+                        AppLocalizations.of(context).translate('female'),
                         style: TextStyle(color: TColor.placeholder,fontSize: 14),
                       )
                     ],
@@ -157,8 +158,8 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
               const SizedBox(height: 10,),
 
               LineTextField(
-                title: "E-mail",
-                hintText: "Ingrese su e-mail",
+                title: AppLocalizations.of(context).translate('e_mail'),
+                hintText: AppLocalizations.of(context).translate('enter_your_e_mail'),
                 controller: txtEmail,
                 keyboardType: TextInputType.emailAddress,
               ),
@@ -220,8 +221,8 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
               const SizedBox(height: 15,),
 
               LineDropDownButton(
-                title: "Zone",
-                hintText: "Select zone",
+                title: AppLocalizations.of(context).translate('zone'),
+                hintText: AppLocalizations.of(context).translate('select_zone'),
                 itemArr: zoneList,
                 didChange: (newObj){
                   setState(() {
@@ -235,7 +236,7 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
               const SizedBox(height: 8,),
 
               Text(
-                "Service List",
+                AppLocalizations.of(context).translate('service_list'),
                 style: TextStyle(
                     color: TColor.primaryText,
                     fontSize: 25,
@@ -283,7 +284,7 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
                   separatorBuilder: (context, index)=>const Divider(),
                   itemCount: serviceList.length
               ),
-              RoundButton(title: "UPDATE", onPressed: (){
+              RoundButton(title: AppLocalizations.of(context).translate('update'), onPressed: (){
                 btnUpdateAction();
               }),
               SizedBox(height: 30,)
@@ -298,22 +299,22 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
 
   void btnUpdateAction(){
     if(txtName.text.isEmpty){
-      mdShowAlert("Error", "Please enter name", () {});
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_enter_name'), () {});
       return;
     }
 
     if(txtEmail.text.isEmpty || !txtEmail.text.isEmail){
-      mdShowAlert("Error", "Please enter email address", () {});
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_enter_e_mail_address'), () {});
       return;
     }
 
     if(txtMobile.text.isEmpty){
-      mdShowAlert("Error", "Please enter mobile number", () {});
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_enter_mobile_number'), () {});
       return;
     }
 
     if(selectZone == null){
-      mdShowAlert("Error", "Select a job zone", () {});
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('select_job_zone'), () {});
       return;
     }
 
@@ -364,14 +365,14 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
               }
 
             }else{
-              mdShowAlert("Error",responseObj[KKey.message] ?? MSG.fail,(){});
+              mdShowAlert(AppLocalizations.of(context).translate('error'),responseObj[KKey.message] ?? MSG.fail,(){});
             }
           },
           failure: (err) async{
-            mdShowAlert("Error",err.toString(),(){});
+            mdShowAlert(AppLocalizations.of(context).translate('error'),err.toString(),(){});
           });
     }catch(e){
-      mdShowAlert("Error",e.toString(),(){});
+      mdShowAlert(AppLocalizations.of(context).translate('error'),e.toString(),(){});
     }
 
   }
@@ -395,7 +396,7 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
               Globs.udSet(ServiceCall.userObj, Globs.userPayload);
               Globs.udBoolSet(true, Globs.userLogin);
 
-              mdShowAlert("Updated", responseObj[KKey.message] ?? MSG.success, () {
+              mdShowAlert(AppLocalizations.of(context).translate('updated'), responseObj[KKey.message] ?? MSG.success, () {
                 context.push(const HomeView());
               });
 
@@ -406,16 +407,16 @@ class _DriverEditProfileViewState extends State<DriverEditProfileView> {
               }
 
             }else{
-              mdShowAlert("Error",responseObj[KKey.message] ?? MSG.fail,(){});
+              mdShowAlert(AppLocalizations.of(context).translate('error'),responseObj[KKey.message] ?? MSG.fail,(){});
             }
           },
           failure: (err) async{
             Globs.hideHUD();
-            mdShowAlert("Error...",err.toString(),(){});
+            mdShowAlert(AppLocalizations.of(context).translate('error'),err.toString(),(){});
           });
     }catch(e){
       Globs.hideHUD();
-      mdShowAlert("Error",e.toString(),(){});
+      mdShowAlert(AppLocalizations.of(context).translate('error'),e.toString(),(){});
     }
 
   }

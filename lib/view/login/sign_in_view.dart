@@ -4,6 +4,8 @@ import "package:transport_app/common/color_extension.dart";
 import "package:transport_app/common_widget/line_text_field.dart";
 import "package:transport_app/common_widget/round_button.dart";
 
+import "../../common/appLocalizations .dart";
+
 class SignInView extends StatefulWidget {
 
   const SignInView({super.key});
@@ -57,7 +59,7 @@ class _SignInViewState extends State<SignInView> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
 
-            Text("Ingresar", 
+            Text(AppLocalizations.of(context).translate('login'),
             style: TextStyle(
               color: TColor.primaryText,
               fontSize: 25,
@@ -122,7 +124,7 @@ class _SignInViewState extends State<SignInView> {
             const SizedBox(height: 8),
 
             LineTextField(
-              title: "Password", 
+              title: AppLocalizations.of(context).translate('password'),
               hintText: "******", 
               controller: txtPassword, 
               keyboardType: TextInputType.phone, 
@@ -137,11 +139,11 @@ class _SignInViewState extends State<SignInView> {
 
             const SizedBox(height: 15),
 
-            RoundButton(title: "Ingresar", onPressed: (){
+            RoundButton(title: AppLocalizations.of(context).translate('get_in'), onPressed: (){
 
             }),
 
-            RoundButton(title: "Olvide la contrasena", onPressed: (){
+            RoundButton(title: AppLocalizations.of(context).translate('forgot_password'), onPressed: (){
 
             }),
             

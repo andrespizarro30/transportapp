@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:transport_app/common/dbhelpers.dart';
 import 'package:transport_app/common_widget/round_button.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/color_extension.dart';
 
 class CarServiceSelectView extends StatefulWidget {
@@ -21,6 +22,20 @@ class CarServiceSelectView extends StatefulWidget {
 class _CarServiceSelectViewState extends State<CarServiceSelectView> {
 
   int selectIndex = 0;
+
+  List<num> maxValsList = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    for (int index = 0; index < widget.serviceArr.length; index++) {
+      var cObj = widget.serviceArr[index] as Map? ?? {};
+      var estMaxVal = ((cObj["est_price_max"] as double? ?? 0.0) % 100)>0 ? ((cObj["est_price_max"] as double? ?? 0.0) ~/ 100) * 100 + 100 : (cObj["est_price_max"] as double? ?? 0.0);
+      maxValsList.add(estMaxVal);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +57,7 @@ class _CarServiceSelectViewState extends State<CarServiceSelectView> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 20),
             child: Text(
-              "Select car service",
+              AppLocalizations.of(context).translate('select_car_service'),
               style: TextStyle(
                 color: TColor.primaryText,
                 fontSize: 17,
@@ -53,8 +68,8 @@ class _CarServiceSelectViewState extends State<CarServiceSelectView> {
           const SizedBox(height: 15,),
 
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            height: 140,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            height: 170,
             child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context,index){
@@ -62,63 +77,112 @@ class _CarServiceSelectViewState extends State<CarServiceSelectView> {
 
                   var estMinVal = ((cObj["est_price_min"] as double? ?? 0.0) % 100)>0 ? ((cObj["est_price_min"] as double? ?? 0.0) ~/ 100) * 100 + 100 : (cObj["est_price_min"] as double? ?? 0.0);
                   var estMaxVal = ((cObj["est_price_max"] as double? ?? 0.0) % 100)>0 ? ((cObj["est_price_max"] as double? ?? 0.0) ~/ 100) * 100 + 100 : (cObj["est_price_max"] as double? ?? 0.0);
-                  
+
                   return InkWell(
                     onTap: (){
                       setState(() {
                         selectIndex = index;
                       });
                     },
-                    child: Stack(
-                      alignment: Alignment.centerLeft,
+                    child: Column(
                       children: [
-                        Container(
-                          margin: const EdgeInsets.only(left: 45),
-                          padding: const EdgeInsets.only(left: 90),
-                          width: 200,
-                          height: 100,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(15),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: selectIndex == index ? TColor.primary : Colors.black26,
-                                    blurRadius: 10
-                                )
-                              ]
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                cObj[DBHelper.service_name],
-                                style: TextStyle(
-                                    color: TColor.primaryText,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w700
-                                ),
+                        Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(left: 45),
+                              padding: const EdgeInsets.only(left: 90),
+                              width: 200,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                  color: selectIndex == index ? Colors.amberAccent : Colors.white,
+                                  borderRadius: BorderRadius.circular(15),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: selectIndex == index ? Colors.redAccent : Colors.black26,
+                                        blurRadius: 20,
+                                      offset: Offset.zero
+                                    )
+                                  ]
                               ),
-                              Text(
-                                "\$${estMinVal.toStringAsFixed(0)} - \$${estMaxVal.toStringAsFixed(0)}",
-                                style: TextStyle(
-                                    color: TColor.primary,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w700
-                                ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    cObj[DBHelper.service_name],
+                                    style: TextStyle(
+                                        color: TColor.primaryText,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w700
+                                    ),
+                                  ),
+                                  Text(
+                                    "\$${estMinVal.toStringAsFixed(0)} - \$${estMaxVal.toStringAsFixed(0)}",
+                                    style: TextStyle(
+                                        color: TColor.primary,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w700
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(20.0),
+                              child: CachedNetworkImage(
+                                imageUrl: cObj["icon"] as String? ?? "",
+                                fit: BoxFit.cover,
+                                width: 130,
+                                height: 100,
+                              ),
+                            ),
+                          ],
                         ),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(20.0),
-                          child: CachedNetworkImage(
-                            imageUrl: cObj["icon"] as String? ?? "",
-                            fit: BoxFit.cover,
-                            width: 130,
-                            height: 100,
-                          ),
-                        ),
+                        SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: (){
+                                setState(() {
+                                  selectIndex = index;
+                                  maxValsList[index] = maxValsList[index] - 500;
+                                  if(maxValsList[index]<estMinVal){
+                                    maxValsList[index] = estMinVal;
+                                  }
+                                });
+                              },
+                              child: Text('-500'),
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                  backgroundColor: TColor.primary
+                              ),
+                            ),
+                            SizedBox(width: 20),
+                            Text(
+                              maxValsList[index].toString(),
+                              style: TextStyle(fontSize: 18),
+                            ),
+                            SizedBox(width: 20), // Spacing between buttons
+                            ElevatedButton(
+                              onPressed: (){
+                                setState(() {
+                                  selectIndex = index;
+                                  maxValsList[index] = maxValsList[index] + 500;
+                                  if(maxValsList[index]>(estMaxVal*2)){
+                                    maxValsList[index] = estMaxVal*2;
+                                  }
+                                });
+                              },
+                              child: Text('+500'),
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                backgroundColor: TColor.primary
+                              ),
+                            ),
+                          ],
+                        )
                       ],
                     ),
                   );
@@ -133,9 +197,10 @@ class _CarServiceSelectViewState extends State<CarServiceSelectView> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 20),
             child: RoundButton(
-                title: "Book Ride",
+                title: AppLocalizations.of(context).translate('book_ride'),
                 onPressed: (){
                   context.pop();
+                  widget.serviceArr[selectIndex]["est_price_max"] = maxValsList[selectIndex].toDouble();
                   widget.didSelect(widget.serviceArr[selectIndex] as Map? ?? {});
                 }
             ),

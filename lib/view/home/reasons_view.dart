@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:transport_app/common_widget/round_button.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/color_extension.dart';
 
 class ReasonsView extends StatefulWidget {
@@ -35,7 +36,7 @@ class _ReasonsViewState extends State<ReasonsView> {
           icon: Icon(Icons.cancel,size: 20,color: Colors.black,),
         ),
         centerTitle: true,
-        title: Text("Cancelacion Viaje",
+        title: Text(AppLocalizations.of(context).translate('travel_cancellation'),
           style: TextStyle(
               color: TColor.primaryText,
               fontSize: 18,

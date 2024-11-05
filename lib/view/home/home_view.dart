@@ -1,9 +1,11 @@
 
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -20,6 +22,7 @@ import 'package:transport_app/view/menu/menu_view.dart';
 import '../../common/appLocalizations .dart';
 import '../../common/globs.dart';
 import '../../common/socket_manager.dart';
+import '../../cubit/change_language/language_cubit.dart';
 import '../../cubit/geolocation/geolocation_bloc.dart';
 import '../../cubit/geolocation/geolocation_event.dart';
 import '../../cubit/geolocation/geolocation_state.dart';
@@ -73,6 +76,8 @@ class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProvid
     }
   }
 
+  Map user_data = {};
+
   @override
   void initState() {
     super.initState();
@@ -103,6 +108,8 @@ class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProvid
     apiHome();
     apiSummaryDaily();
     apiDriverRatings();
+
+    getUserData();
 
     isDriverOnLine = Globs.udValueBool("is_online");
 
@@ -153,6 +160,7 @@ class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: BlocBuilder<GeolocationBloc, GeolocationState>(
         builder: (context, state) {
@@ -352,7 +360,7 @@ class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProvid
                               children: [
                                 IconTitleSubtitleButton(
                                     title: "${(double.tryParse(driverRating["acceptante_rating"].toString()) ?? 0.0).toStringAsFixed(0)}%",
-                                    subTitle: "Aceptacion",
+                                    subTitle: AppLocalizations.of(context).translate('acceptance'),
                                     icon: Icon(Icons.check_circle,size: 30,color: TColor.primary,),
                                     onPress: (){
 
@@ -367,7 +375,7 @@ class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProvid
                                 ),
                                 IconTitleSubtitleButton(
                                     title: (double.tryParse(driverRating["driver_rating"].toString()) ?? 0.0).toStringAsFixed(2),
-                                    subTitle: "Califcacion",
+                                    subTitle: AppLocalizations.of(context).translate('rating'),
                                     icon: Icon(Icons.star_rate,size: 30,color: TColor.primary,),
                                     onPress: (){
 
@@ -382,7 +390,7 @@ class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProvid
                                 ),
                                 IconTitleSubtitleButton(
                                     title: "${(double.tryParse(driverRating["cancel_rating"].toString()) ?? 0.0).toStringAsFixed(0)}%",
-                                    subTitle: "Cancelacion",
+                                    subTitle: AppLocalizations.of(context).translate('cancellation'),
                                     icon: Icon(Icons.cancel_presentation_outlined,size: 30,color: TColor.primary,),
                                     onPress: (){
 
@@ -453,7 +461,7 @@ class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProvid
                                   children: [
                                     InkWell(
                                       onTap:(){
-                                        context.push(const MenuView());
+                                        context.push(MenuView(user_data: user_data,));
                                       },
                                       child: Container(
                                         margin: EdgeInsets.only(left: 10),
@@ -470,30 +478,38 @@ class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProvid
                                         ),
                                         child: ClipRRect(
                                             borderRadius: BorderRadius.circular(30),
-                                            child: Image.asset(
-                                              "assets/images/u1.png",
+                                            child: CachedNetworkImage(
+                                              imageUrl: user_data["image"] as String? ?? "",
                                               width: 40,
                                               height: 40,
+                                              fit: BoxFit.contain,
+                                              placeholder: (context, url) => Center(
+                                                  child: Image.asset(
+                                                    "assets/images/u1.png",
+                                                    width: 40,
+                                                    height: 40,
+                                                  ) // Loading indicator
+                                              ),
                                             )
                                         ),
                                       ),
                                     ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(30),
-                                      ),
-                                      constraints: const BoxConstraints(minWidth: 15),
-                                      child: Text(
-                                        "3",
-                                        style: TextStyle(
-                                            color: TColor.bg,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w800
-                                        ),
-                                      ),
-                                    )
+                                    // Container(
+                                    //   padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
+                                    //   decoration: BoxDecoration(
+                                    //     color: Colors.red,
+                                    //     borderRadius: BorderRadius.circular(30),
+                                    //   ),
+                                    //   constraints: const BoxConstraints(minWidth: 15),
+                                    //   child: Text(
+                                    //     "3",
+                                    //     style: TextStyle(
+                                    //         color: TColor.bg,
+                                    //         fontSize: 10,
+                                    //         fontWeight: FontWeight.w800
+                                    //     ),
+                                    //   ),
+                                    // )
                                   ],
                                 ),
                               )
@@ -508,13 +524,13 @@ class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProvid
 
           }else
           if (state is GeolocationFailure) {
-            return Center(child: Text('Error: ${state.error}'));
+            return Center(child: Text(AppLocalizations.of(context).translate('error') + ': ${state.error}'));
           }else{
             getPosition();
             if(!isDriverOnLine){
               stopGetPosition();
             }
-            return Center(child: Text('Awaiting Location...'));
+            return Center(child: Text(AppLocalizations.of(context).translate('awaiting_location') + '...'));
           }
         }
       ),
@@ -548,7 +564,7 @@ class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProvid
             }
           }else{
             isDriverOnLine = !isDriverOnLine;
-            mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail, () { });
+            mdShowAlert(AppLocalizations.of(context).translate('error'), responseObj[KKey.message] as String? ?? MSG.fail, () { });
           }
         },
         failure: (error)async{
@@ -572,7 +588,7 @@ class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProvid
               context.push(RunRideView(rObj: rObj));
             }
           }else{
-            mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail, () { });
+            mdShowAlert(AppLocalizations.of(context).translate('error'), responseObj[KKey.message] as String? ?? MSG.fail, () { });
           }
         },
         failure: (error)async{
@@ -678,7 +694,7 @@ class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProvid
               print(responseObj[KKey.message] as String? ?? MSG.success);
             }
           }else{
-            mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail, () { });
+            mdShowAlert(AppLocalizations.of(context).translate('error'), responseObj[KKey.message] as String? ?? MSG.fail, () { });
           }
         },
         failure: (error)async{
@@ -720,6 +736,30 @@ class _HomeViewState extends State<HomeView> with RouteAware, SingleTickerProvid
 
     });
 
+  }
+
+  void getUserData(){
+    Globs.showHUD();
+
+    ServiceCall.post(
+        {},
+        isTokenApi: true,
+        SVKey.svGetProfileData,
+        withSuccess: (responseObj) async{
+          Globs.hideHUD();
+          if((responseObj[KKey.status] as String? ?? "") == "1"){
+            user_data = responseObj[KKey.payload] as Map? ?? {};
+          }else{
+            user_data = {};
+          }
+          setState(() {
+
+          });
+        },
+        failure: (err) async{
+          Globs.hideHUD();
+        }
+    );
   }
 
 }

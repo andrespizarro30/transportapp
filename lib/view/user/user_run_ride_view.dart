@@ -23,6 +23,7 @@ import 'package:flutter_timer_countdown/flutter_timer_countdown.dart';
 import 'package:transport_app/view/home/support/support_message_view.dart';
 import 'package:transport_app/view/home/tip_detail_view.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/color_extension.dart';
 import '../../common/globs.dart';
 import '../../common/service_call.dart';
@@ -741,7 +742,7 @@ class _UserRunRideViewState extends State<UserRunRideView> {
                                 Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 20),
                                   child: RoundButton(
-                                    title: "RATE RIDER",
+                                    title: AppLocalizations.of(context).translate('RATE_RIDER'),
                                     onPressed: () {
                                       apiSubmitRate();
                                     },
@@ -758,7 +759,7 @@ class _UserRunRideViewState extends State<UserRunRideView> {
                           horizontal: 20, vertical: 10),
                       child: InkWell(
                         onTap: () {
-                          context.pop();
+                          //context.pop();
                         },
                         child: Container(
                             padding: const EdgeInsets.symmetric(

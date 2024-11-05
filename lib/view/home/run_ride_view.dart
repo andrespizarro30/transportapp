@@ -20,6 +20,7 @@ import 'package:transport_app/common_widget/timer_frame.dart';
 import 'package:flutter_timer_countdown/flutter_timer_countdown.dart';
 import 'package:transport_app/view/home/support/support_message_view.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/color_extension.dart';
 import '../../common/globs.dart';
 import '../../common/service_call.dart';
@@ -107,7 +108,7 @@ class _RunRideViewState extends State<RunRideView> {
   }
 
   void openUserRideCancelPopUp(){
-    mdShowAlert("User ride cancel", "User cancel ride", isForce: true, () {
+    mdShowAlert(AppLocalizations.of(context).translate('user_ride_cancel'), AppLocalizations.of(context).translate('user_cancel_ride'), isForce: true, () {
       context.pop();
     });
   }
@@ -203,7 +204,7 @@ class _RunRideViewState extends State<RunRideView> {
                                       ),
                                     ),
                                     Text(
-                                      "Esperando al usuario",
+                                      AppLocalizations.of(context).translate('waiting_to_user'),
                                       style: TextStyle(
                                           color: TColor.secondary,
                                           fontSize: 16,
@@ -322,7 +323,7 @@ class _RunRideViewState extends State<RunRideView> {
                                         ),
                                       ),
                                       Text(
-                                        "${statusName()} a ${rideObj["name"] ?? ""}",
+                                        "${statusName()} " + AppLocalizations.of(context).translate('to') + " ${rideObj["name"] ?? ""}",
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                             color: TColor.secondaryText,
@@ -454,7 +455,7 @@ class _RunRideViewState extends State<RunRideView> {
                                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                       children: [
                                                         Text(
-                                                          "No Plate: ${rideObj["car_number"] as String? ?? ""}",
+                                                          AppLocalizations.of(context).translate('no_plate') + ": ${rideObj["car_number"] as String? ?? ""}",
                                                           style: TextStyle(
                                                             color: TColor.secondaryText,
                                                             fontSize: 14,
@@ -508,12 +509,12 @@ class _RunRideViewState extends State<RunRideView> {
                                               ],
                                             ),
                                             SizedBox(height: 15),
-                                            IconTitleButton(title: "Mensaje",icon: Icon(Icons.message),onPress: (){
+                                            IconTitleButton(title: AppLocalizations.of(context).translate('message'),icon: Icon(Icons.message),onPress: (){
 
                                             }),
                                             SizedBox(height: 15),
                                             IconTitleButton(
-                                                title: "Cancelar",
+                                                title: AppLocalizations.of(context).translate('cancelling'),
                                                 icon: Icon(Icons.cancel),
                                                 onPress: () async{
                                                   await showModalBottomSheet(
@@ -551,7 +552,7 @@ class _RunRideViewState extends State<RunRideView> {
                                                                 mainAxisSize: MainAxisSize.min,
                                                                 children: [
                                                                   Text(
-                                                                    "Cancelar a ${rideObj["name"] ?? ""}?",
+                                                                    AppLocalizations.of(context).translate('cancelling') + " ${AppLocalizations.of(context).translate('to')} " +" ${rideObj["name"] ?? ""}?",
                                                                     style: TextStyle(
                                                                         color: TColor.primaryText,
                                                                         fontSize: 18,
@@ -560,7 +561,7 @@ class _RunRideViewState extends State<RunRideView> {
                                                                   ),
                                                                   const SizedBox(height: 15,),
                                                                   RoundButton(
-                                                                      title: "SI, CANCELAR",
+                                                                      title: AppLocalizations.of(context).translate('yes') +" "+ AppLocalizations.of(context).translate('cancelling'),
                                                                       buttonType: RoundButtonType.red,
                                                                       onPressed: (){
                                                                         context.pop();
@@ -570,7 +571,7 @@ class _RunRideViewState extends State<RunRideView> {
                                                                   ),
                                                                   const SizedBox(height: 15,),
                                                                   RoundButton(
-                                                                      title: "NO",
+                                                                      title: AppLocalizations.of(context).translate('no'),
                                                                       buttonType: RoundButtonType.boarded,
                                                                       onPressed: (){
                                                                         context.pop();
@@ -595,9 +596,9 @@ class _RunRideViewState extends State<RunRideView> {
                                         Padding(
                                           padding: EdgeInsets.symmetric(horizontal: 20),
                                           child: RoundButton(
-                                            title: rideObj["booking_status"] == bsAccept ? "ARRIVED" :
-                                            rideObj["booking_status"] == bsWaitUser ? "START" :
-                                            "COMPLETE",
+                                            title: rideObj["booking_status"] == bsAccept ? AppLocalizations.of(context).translate('ARRIVED') :
+                                            rideObj["booking_status"] == bsWaitUser ? AppLocalizations.of(context).translate('START') :
+                                            AppLocalizations.of(context).translate('COMPLETE'),
                                             onPressed: () async{
                                               if(rideObj["booking_status"] == bsAccept){
                                                 apiAwaitingForUser();
@@ -619,7 +620,7 @@ class _RunRideViewState extends State<RunRideView> {
                                                             mainAxisAlignment: MainAxisAlignment.start,
                                                             children: [
                                                               Text(
-                                                                "Enter OTP",
+                                                                AppLocalizations.of(context).translate('enter_otp'),
                                                                 textAlign: TextAlign.center,
                                                                 style: TextStyle(
                                                                     color: TColor.primaryText,
@@ -628,7 +629,7 @@ class _RunRideViewState extends State<RunRideView> {
                                                                 ),
                                                               ),
                                                               Text(
-                                                                "Please enter user OTP",
+                                                                AppLocalizations.of(context).translate('please_enter_user_otp'),
                                                                 textAlign: TextAlign.center,
                                                                 style: TextStyle(
                                                                     color: TColor.secondaryText,
@@ -659,7 +660,7 @@ class _RunRideViewState extends State<RunRideView> {
                                                                         context.pop();
                                                                       },
                                                                       child: Text(
-                                                                        "Cancelar",
+                                                                        AppLocalizations.of(context).translate('cancelling'),
                                                                         textAlign: TextAlign.center,
                                                                         style: TextStyle(
                                                                             color: Colors.red,
@@ -674,7 +675,7 @@ class _RunRideViewState extends State<RunRideView> {
                                                                         context.pop();
                                                                       },
                                                                       child: Text(
-                                                                        "RIDE START",
+                                                                        AppLocalizations.of(context).translate('RIDE_START'),
                                                                         textAlign: TextAlign.center,
                                                                         style: TextStyle(
                                                                             color: TColor.primary,
@@ -708,7 +709,7 @@ class _RunRideViewState extends State<RunRideView> {
                                                             mainAxisAlignment: MainAxisAlignment.start,
                                                             children: [
                                                               Text(
-                                                                "Ingrese Valor del Peaje",
+                                                                AppLocalizations.of(context).translate('ENTER_TOLL_VALUE'),
                                                                 textAlign: TextAlign.center,
                                                                 style: TextStyle(
                                                                     color: TColor.primaryText,
@@ -717,7 +718,7 @@ class _RunRideViewState extends State<RunRideView> {
                                                                 ),
                                                               ),
                                                               Text(
-                                                                "Por favor ingrese el valor del peaje",
+                                                                AppLocalizations.of(context).translate('please_enter_toll_value'),
                                                                 textAlign: TextAlign.center,
                                                                 style: TextStyle(
                                                                     color: TColor.secondaryText,
@@ -748,7 +749,7 @@ class _RunRideViewState extends State<RunRideView> {
                                                                         context.pop();
                                                                       },
                                                                       child: Text(
-                                                                        "Cancelar",
+                                                                        AppLocalizations.of(context).translate('cancelling'),
                                                                         textAlign: TextAlign.center,
                                                                         style: TextStyle(
                                                                             color: Colors.red,
@@ -763,7 +764,7 @@ class _RunRideViewState extends State<RunRideView> {
                                                                         apiRideStop();
                                                                       },
                                                                       child: Text(
-                                                                        "DONE",
+                                                                        AppLocalizations.of(context).translate('DONE'),
                                                                         textAlign: TextAlign.center,
                                                                         style: TextStyle(
                                                                             color: TColor.primary,
@@ -822,7 +823,7 @@ class _RunRideViewState extends State<RunRideView> {
                                       Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 10),
                                         child: Text(
-                                          "How was your ride?",
+                                          AppLocalizations.of(context).translate('how_was_your_ride'),
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                               color: TColor.primaryText,
@@ -864,7 +865,7 @@ class _RunRideViewState extends State<RunRideView> {
                                       Padding(
                                         padding: EdgeInsets.symmetric(horizontal: 20),
                                         child: RoundButton(
-                                          title:"RATE RIDER",
+                                          title:AppLocalizations.of(context).translate('RATE_USER'),
                                           onPressed: (){
                                             apiSubmitRate();
                                           },
@@ -885,7 +886,7 @@ class _RunRideViewState extends State<RunRideView> {
                                 padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
                                 child: InkWell(
                                   onTap: (){
-                                    context.pop();
+                                    //context.pop();
                                   },
                                   child: Container(
                                       padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 25),
@@ -927,7 +928,7 @@ class _RunRideViewState extends State<RunRideView> {
               },
             );
           }else{
-            return Center(child: Text('Awaiting Location...'));
+            return Center(child: Text(AppLocalizations.of(context).translate('awaiting_location')));
           }
         },
       ),
@@ -940,7 +941,7 @@ class _RunRideViewState extends State<RunRideView> {
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
         infoWindow: InfoWindow(
           //title: address!.placeName,
-            snippet: "Partida"),
+            snippet: AppLocalizations.of(context).translate('starting_point')),
         position: origPos);
 
     Marker destLocationMarker = Marker(
@@ -948,7 +949,7 @@ class _RunRideViewState extends State<RunRideView> {
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         infoWindow: InfoWindow(
           //title: result!.name!,
-            snippet: "Llegada"),
+            snippet: AppLocalizations.of(context).translate('arriving_point')),
         position: destPos);
 
     markersSet.clear();
@@ -1081,7 +1082,7 @@ class _RunRideViewState extends State<RunRideView> {
   void apiRideStart(){
 
     if(txtOTP.text.length != 4){
-      mdShowAlert("Error", "Validate the OTP", () { });
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('validate_otp'), () { });
       return;
     }
 
@@ -1143,7 +1144,8 @@ class _RunRideViewState extends State<RunRideView> {
             if(mounted){
               setState(() {});
             }
-            mdShowAlert("Ride completed", responseObj[KKey.message] as String? ?? "", () { });
+            //mdShowAlert(AppLocalizations.of(context).translate('ride_complete'), responseObj[KKey.message] as String? ?? "", () { });
+            showRideCompletedPopUp();
           }else{
             mdShowAlert(Globs.appName, responseObj[KKey.message] as String? ?? MSG.fail, () { });
           }
@@ -1211,38 +1213,38 @@ class _RunRideViewState extends State<RunRideView> {
   String statusName(){
     switch(rideObj["booking_status"]){
       case 2:
-        return "Pickup Up";
+        return AppLocalizations.of(context).translate('pick_up');
       case 3:
-        return "Waiting for";
+        return AppLocalizations.of(context).translate('waiting_for');
       case 4:
-        return "Ride Started with";
+        return AppLocalizations.of(context).translate('ride_started_with');
       case 5:
-        return "Ride Completed with";
+        return AppLocalizations.of(context).translate('ride_completed_with');
       case 6:
-        return "Ride Cancel";
+        return AppLocalizations.of(context).translate('ride_cancel');
       case 7:
-        return "No Driver Found";
+        return AppLocalizations.of(context).translate('no_driver_found');
       default:
-        return "Finding Driver Near By";
+        return AppLocalizations.of(context).translate('finding_driver_near_by');
     }
   }
 
   String statusText(){
     switch(rideObj["booking_status"]){
       case 2:
-        return "On way";
+        return AppLocalizations.of(context).translate('on_way');
       case 3:
-        return "Waiting";
+        return AppLocalizations.of(context).translate('waiting');
       case 4:
-        return "Started";
+        return AppLocalizations.of(context).translate('started');
       case 5:
-        return "Completed";
+        return AppLocalizations.of(context).translate('completed');
       case 6:
-        return "Cancel";
+        return AppLocalizations.of(context).translate('cancel');
       case 7:
-        return "No Drivers";
+        return AppLocalizations.of(context).translate('no_drivers');
       default:
-        return "Pending";
+        return AppLocalizations.of(context).translate('pending');
     }
   }
 
@@ -1263,6 +1265,224 @@ class _RunRideViewState extends State<RunRideView> {
       default:
         return Colors.blue;
     }
+  }
+
+  void showRideCompletedPopUp() async {
+
+    var taxAmt = rideObj["tax_amt"] ?? 0.0;
+    var tollAmt = double.tryParse(rideObj["toll_tax"] ?? "0.0") ?? 0.0;
+    var payableAmt = double.tryParse(rideObj["amt"] ?? "0.0") ?? 0.0;
+    var totalAmt = payableAmt - tollAmt - taxAmt;
+
+    await showModalBottomSheet(
+        backgroundColor: Colors.transparent,
+        barrierColor: Colors.transparent,
+        isScrollControlled: true,
+        context: context,
+        builder: (context) {
+          return Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: Container(
+                  color: Colors.black38,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10))),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Ride Completed",
+                      style: TextStyle(
+                          color: TColor.primaryText,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    const Divider(),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Payment mode:",
+                          style: TextStyle(
+                              color: TColor.primaryText, fontSize: 20),
+                        ),
+                        Text(
+                          (rideObj["payment_type"] ?? 1) == 1
+                              ? "COD"
+                              : "ONLINE",
+                          style: TextStyle(
+                              color: TColor.primary,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700),
+                        )
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Total Distance",
+                          style: TextStyle(
+                              color: TColor.primaryText, fontSize: 17),
+                        ),
+                        Text(
+                          "${(double.tryParse(rideObj["total_distance"].toString() ?? "0.0") ?? 0.0).toStringAsFixed(2)} Km",
+                          style: TextStyle(
+                              color: TColor.primaryText,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700),
+                        )
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Total Duration:",
+                          style: TextStyle(
+                              color: TColor.primaryText, fontSize: 17),
+                        ),
+                        Text(
+                          rideObj["duration"] ?? "00:00",
+                          style: TextStyle(
+                              color: TColor.primaryText,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700),
+                        )
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    const Divider(),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Total Amount",
+                          style: TextStyle(
+                              color: TColor.primaryText, fontSize: 17),
+                        ),
+                        Text(
+                          "+\$${totalAmt.toStringAsFixed(2)}",
+                          style: TextStyle(
+                              color: TColor.primaryText,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700),
+                        )
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Tax Amount:",
+                          style: TextStyle(
+                              color: TColor.primaryText, fontSize: 17),
+                        ),
+                        Text(
+                          "+\$${taxAmt.toStringAsFixed(2)}",
+                          style: TextStyle(
+                              color: TColor.primaryText,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700),
+                        )
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Toll Tax:",
+                          style: TextStyle(
+                              color: TColor.primaryText, fontSize: 17),
+                        ),
+                        Text(
+                          "+\$${tollAmt.toStringAsFixed(2)}",
+                          style: TextStyle(
+                              color: TColor.primaryText,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700),
+                        )
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          width: 90,
+                          height: 2,
+                          color: TColor.primaryText,
+                        )
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Payable Amount:",
+                          style: TextStyle(
+                              color: TColor.primaryText,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700),
+                        ),
+                        Text(
+                          "\$${payableAmt.toStringAsFixed(2)}",
+                          style: TextStyle(
+                              color: TColor.primaryText,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700),
+                        )
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    RoundButton(
+                        title: "OK",
+                        buttonType: RoundButtonType.primary,
+                        onPressed: () {
+                          context.pop();
+                        }),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    // RoundButton(
+                    //     title: "No",
+                    //     buttonType: RoundButtonType.red,
+                    //     onPressed: () {
+                    //       context.pop();
+                    //     })
+                  ],
+                ),
+              )
+            ],
+          );
+        });
   }
 
 

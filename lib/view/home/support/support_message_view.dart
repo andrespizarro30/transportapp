@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:transport_app/common/common_extension.dart';
 import 'package:transport_app/common_widget/support_user_row.dart';
 
+import '../../../common/appLocalizations .dart';
 import '../../../common/color_extension.dart';
 import '../../../common/globs.dart';
 import '../../../common/service_call.dart';
@@ -87,7 +88,7 @@ class _SupportMessageViewState extends State<SupportMessageView> {
               onPressed: (){
                 clearMessagesAction();
               },
-              child: Text("Clear All", style: TextStyle(color: TColor.primary, fontSize: 15, fontWeight: FontWeight.w700),)
+              child: Text(AppLocalizations.of(context).translate('clear_all'), style: TextStyle(color: TColor.primary, fontSize: 15, fontWeight: FontWeight.w700),)
           )
         ],
       ),
@@ -182,7 +183,7 @@ class _SupportMessageViewState extends State<SupportMessageView> {
                                   contentPadding: const EdgeInsets.all(12),
                                   enabledBorder: InputBorder.none,
                                   focusedBorder: InputBorder.none,
-                                  hintText: "Type here",
+                                  hintText: AppLocalizations.of(context).translate('type_here'),
                                   hintStyle: TextStyle(
                                       color: TColor.secondaryText,
                                       fontSize: 15
@@ -298,17 +299,17 @@ class _SupportMessageViewState extends State<SupportMessageView> {
           if(responseObj[KKey.status] == "1"){
             listArr = [];
             setState(() {});
-            mdShowAlert("Success", responseObj[KKey.message] as String? ?? MSG.success,(){
+            mdShowAlert(AppLocalizations.of(context).translate('success'), responseObj[KKey.message] as String? ?? MSG.success,(){
 
             });
           }else{
-            mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail,(){
+            mdShowAlert(AppLocalizations.of(context).translate('error'), responseObj[KKey.message] as String? ?? MSG.fail,(){
 
             });
           }
         },
         failure: (error) async{
-          mdShowAlert("Error", error.toString(),(){
+          mdShowAlert(AppLocalizations.of(context).translate('error'), error.toString(),(){
 
           });
         }

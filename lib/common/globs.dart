@@ -79,7 +79,7 @@ class Globs{
 }
 
 class SVKey{
-  //static const mainUrl = "http://192.168.10.20:3001";
+  //static const mainUrl = "http://192.168.10.17:3001";
   //static const mainUrl = "http://localhost:3001";
   static const mainUrl = "https://transportapp.azurewebsites.net";
   static const baseUrl = "$mainUrl/api/";
@@ -89,6 +89,8 @@ class SVKey{
   static const svProfileImageUpload = "${baseUrl}profile_image";
   static const svServiceAndZoneList = "${baseUrl}service_and_zone_list";
   static const svProfileUpdate = "${baseUrl}profile_update";
+
+  static const svGetProfileData = "${baseUrl}user_data";
 
   static const svUpdatePushToken = "${baseUrl}updatepushtoken";
 

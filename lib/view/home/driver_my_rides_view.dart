@@ -7,6 +7,7 @@ import 'package:transport_app/common/common_extension.dart';
 import 'package:transport_app/view/home/run_ride_view.dart';
 import 'package:transport_app/view/home/tip_detail_view.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/globs.dart';
 import '../../common/service_call.dart';
 
@@ -44,7 +45,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
           icon: Image.asset("./assets/images/back.png",width: 25,height: 25,),
         ),
         centerTitle: true,
-        title: Text("My Rides",
+        title: Text(AppLocalizations.of(context).translate('my_rides'),
           style: TextStyle(
               color: TColor.primaryText,
               fontSize: 18,
@@ -190,7 +191,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Total Distance:",
+                                AppLocalizations.of(context).translate('total_distance')+":",
                                 style: TextStyle(
                                     color: TColor.primaryText,
                                     fontSize: 15,
@@ -213,7 +214,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Duration:",
+                                AppLocalizations.of(context).translate('duration')+":",
                                 style: TextStyle(
                                     color: TColor.primaryText,
                                     fontSize: 15,
@@ -236,7 +237,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Driver Amount:",
+                                AppLocalizations.of(context).translate('driver_amount'),
                                 style: TextStyle(
                                     color: TColor.primaryText,
                                     fontSize: 15,
@@ -258,7 +259,7 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Total Amount:",
+                                AppLocalizations.of(context).translate('total_amount'),
                                 style: TextStyle(
                                     color: TColor.primaryText,
                                     fontSize: 15,
@@ -306,12 +307,12 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
               setState(() {});
             }
           }else{
-            mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail, () {});
+            mdShowAlert(AppLocalizations.of(context).translate('error'), responseObj[KKey.message] as String? ?? MSG.fail, () {});
           }
         },
         failure: (error)async{
           Globs.hideHUD();
-          mdShowAlert("Error", error.toString() as String? ?? MSG.fail, () {});
+          mdShowAlert(AppLocalizations.of(context).translate('error'), error.toString() as String? ?? MSG.fail, () {});
         }
     );
   }
@@ -319,19 +320,19 @@ class _DriverMyRidesViewState extends State<DriverMyRidesView> {
   String statusText(Map rideObj){
     switch(rideObj["booking_status"]){
       case 2:
-        return "On way";
+        return AppLocalizations.of(context).translate('on_way');
       case 3:
-        return "Waiting";
+        return AppLocalizations.of(context).translate('waiting');
       case 4:
-        return "Started";
+        return AppLocalizations.of(context).translate('started');
       case 5:
-        return "Completed";
+        return AppLocalizations.of(context).translate('completed');
       case 6:
-        return "Cancel";
+        return AppLocalizations.of(context).translate('cancel');
       case 7:
-        return "No Drivers";
+        return AppLocalizations.of(context).translate('no_drivers');
       default:
-        return "Pending";
+        return AppLocalizations.of(context).translate('pending');
     }
   }
 

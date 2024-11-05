@@ -10,6 +10,7 @@ import "package:transport_app/common_widget/popup_layout.dart";
 import "package:transport_app/common_widget/round_button.dart";
 import "package:transport_app/view/login/add_vehicle_view.dart";
 
+import "../../common/appLocalizations .dart";
 import "../../common/globs.dart";
 import "../../common/service_call.dart";
 
@@ -68,7 +69,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
       ),
       body: !isApiData ?
       Center(child: Text(
-          "Loading...",
+        AppLocalizations.of(context).translate('loading') + "...",
           style: TextStyle(
               color: TColor.primaryText,
               fontSize: 25,
@@ -149,7 +150,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
                                         context.pop();
                                       }, 
                                       child: Text(
-                                        "Cargar",
+                                        AppLocalizations.of(context).translate('upload'),
                                         style: TextStyle(
                                           color: TColor.primary,
                                           fontSize: 15,
@@ -199,7 +200,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
 
               const SizedBox(height: 15,),
         
-              RoundButton(title: "Siguiente", onPressed: (){
+              RoundButton(title: AppLocalizations.of(context).translate('next'), onPressed: (){
                 context.push(const AddVehicleView());        
               })
               
@@ -227,7 +228,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
               setState(() {});
             }
           }else{
-            mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail,(){});
+            mdShowAlert(AppLocalizations.of(context).translate('error'), responseObj[KKey.message] as String? ?? MSG.fail,(){});
           }
         },
         failure: (err)async{
@@ -247,10 +248,10 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
         withSuccess: (responseObj)async{
           Globs.hideHUD();
           if(responseObj[KKey.status] == "1"){
-            mdShowAlert("Success", responseObj[KKey.message] as String? ?? MSG.success, () { });
+            mdShowAlert(AppLocalizations.of(context).translate('success'), responseObj[KKey.message] as String? ?? MSG.success, () { });
             apiDocumentList();
           }else{
-            mdShowAlert("Error", responseObj[KKey.message] as String? ?? MSG.fail,(){});
+            mdShowAlert(AppLocalizations.of(context).translate('error'), responseObj[KKey.message] as String? ?? MSG.fail,(){});
           }
         },
         failure: (err)async{

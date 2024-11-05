@@ -12,6 +12,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:transport_app/common/common_extension.dart';
 import 'package:transport_app/common_widget/title_subtitle_row.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/color_extension.dart';
 import '../../common/globs.dart';
 import '../../common/service_call.dart';
@@ -84,7 +85,7 @@ class _TipDetailViewState extends State<TipDetailView>{
           },
         ),
         centerTitle: true,
-        title: Text("Trip Details",
+        title: Text(AppLocalizations.of(context).translate('trip_details'),
           style: TextStyle(
             color: TColor.primaryText,
             fontSize: 18,
@@ -98,7 +99,7 @@ class _TipDetailViewState extends State<TipDetailView>{
               },
               icon: Icon(Icons.help,size: 30,),
               label: Text(
-                "Help",
+                AppLocalizations.of(context).translate('help'),
                 style: TextStyle(
                   color: TColor.primary,
                   fontSize: 14
@@ -109,7 +110,7 @@ class _TipDetailViewState extends State<TipDetailView>{
       ),
       body: !isApiData ?
       Center(child: Text(
-          "Loading...",
+        AppLocalizations.of(context).translate('loading')+"...",
           style: TextStyle(
             color: TColor.primaryText,
             fontSize: 25,
@@ -263,7 +264,7 @@ class _TipDetailViewState extends State<TipDetailView>{
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 2),
                     child: Text(
-                      "Payment made succesfully by ${bookinObj["payment_type"] == 1 ? "Cash" : "Online"}",
+                      AppLocalizations.of(context).translate('payment_made_successfully_by') + " ${bookinObj["payment_type"] == 1 ? "Cash" : "Online"}",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: TColor.secondaryText,
@@ -292,7 +293,7 @@ class _TipDetailViewState extends State<TipDetailView>{
                                 ),
                               ),
                               Text(
-                                "Time",
+                                AppLocalizations.of(context).translate('time'),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: TColor.secondaryText,
@@ -322,7 +323,7 @@ class _TipDetailViewState extends State<TipDetailView>{
                                   ),
                                 ),
                                 Text(
-                                  "Distance",
+                                  AppLocalizations.of(context).translate('distance'),
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       color: TColor.secondaryText,
@@ -341,8 +342,8 @@ class _TipDetailViewState extends State<TipDetailView>{
                     padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 20),
                     child: Column(
                       children: [
-                        TitleSubtitleRow(title: "Date Time", subTitle: "${bookinObj["stop_time"] as String? ?? ""}".dataFormat().stringFormat(format: "dd MM, yyyy hh:mm a")),
-                        TitleSubtitleRow(title: "Service Type", subTitle: "${bookinObj["service_name"] as String? ?? ""}"),
+                        TitleSubtitleRow(title: AppLocalizations.of(context).translate('date_time'), subTitle: "${bookinObj["stop_time"] as String? ?? ""}".dataFormat().stringFormat(format: "dd MM, yyyy hh:mm a")),
+                        TitleSubtitleRow(title: AppLocalizations.of(context).translate('service_type'), subTitle: "${bookinObj["service_name"] as String? ?? ""}"),
                         //TitleSubtitleRow(title: "Trip Type", subTitle: "Normal")
                       ],
                     ),
@@ -355,7 +356,7 @@ class _TipDetailViewState extends State<TipDetailView>{
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "You rated ${bookinObj["name"] as String? ?? ""}",
+                          AppLocalizations.of(context).translate('you_rated') + " ${bookinObj["name"] as String? ?? ""}",
                           style: TextStyle(
                               color: TColor.secondaryText,
                               fontSize: 13,
@@ -400,7 +401,7 @@ class _TipDetailViewState extends State<TipDetailView>{
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
               child: Text(
-                "RECEIPT",
+                AppLocalizations.of(context).translate('RECEIPT'),
                 style: TextStyle(
                     color: TColor.secondaryText,
                     fontSize: 18,
@@ -430,10 +431,10 @@ class _TipDetailViewState extends State<TipDetailView>{
                     padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 20),
                     child: Column(
                       children: [
-                        TitleSubtitleRow(title: "Trip fares", subTitle: "\$ ${totalAmt.toStringAsFixed(2)}", color: TColor.secondaryText,),
+                        TitleSubtitleRow(title: AppLocalizations.of(context).translate('trip_fares'), subTitle: "\$ ${totalAmt.toStringAsFixed(2)}", color: TColor.secondaryText,),
                         // TitleSubtitleRow(title: "Fee", subTitle: "\$ 20.00", color: TColor.secondaryText,),
-                        TitleSubtitleRow(title: "+ Tax", subTitle: "\$ ${taxAmt.toStringAsFixed(2)}", color: TColor.secondaryText,),
-                        TitleSubtitleRow(title: "+ Tolls", subTitle: "\$ ${tollAmt.toStringAsFixed(2)}", color: TColor.secondaryText,),
+                        TitleSubtitleRow(title: "+ " + AppLocalizations.of(context).translate('tax'), subTitle: "\$ ${taxAmt.toStringAsFixed(2)}", color: TColor.secondaryText,),
+                        TitleSubtitleRow(title: "+ " + AppLocalizations.of(context).translate('tolls'), subTitle: "\$ ${tollAmt.toStringAsFixed(2)}", color: TColor.secondaryText,),
                         // TitleSubtitleRow(title: "+ Discount", subTitle: "\$ 0.00", color: TColor.secondaryText,),
                         // TitleSubtitleRow(title: "+ Topup Added", subTitle: "\$ 0.00", color: TColor.secondaryText,),
                       ],
@@ -444,7 +445,7 @@ class _TipDetailViewState extends State<TipDetailView>{
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 20),
                     child: TitleSubtitleRow(
-                      title: "Your payment",
+                      title: AppLocalizations.of(context).translate('your_payment'),
                       subTitle: "\$ ${payableAmt.toStringAsFixed(2)}",
                       color: TColor.primary,
                       fontWeight: FontWeight.w800,
@@ -454,7 +455,7 @@ class _TipDetailViewState extends State<TipDetailView>{
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 1),
                     child: Text(
-                      "This trip was towards your destination you received Guaranteed fare",
+                      AppLocalizations.of(context).translate('guaranteed_fare'),
                       style: TextStyle(
                           color: TColor.secondaryText,
                           fontSize: 13,
@@ -477,7 +478,7 @@ class _TipDetailViewState extends State<TipDetailView>{
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
         infoWindow: InfoWindow(
           //title: address!.placeName,
-            snippet: "Partida"),
+            snippet: AppLocalizations.of(context).translate('starting_point')),
         position: origPos);
 
     Marker destLocationMarker = Marker(
@@ -485,7 +486,7 @@ class _TipDetailViewState extends State<TipDetailView>{
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         infoWindow: InfoWindow(
           //title: result!.name!,
-            snippet: "Llegada"),
+            snippet: AppLocalizations.of(context).translate('arriving_point')),
         position: destPos);
 
     markersSet.clear();
