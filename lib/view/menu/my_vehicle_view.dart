@@ -7,6 +7,7 @@ import 'package:transport_app/view/login/add_vehicle_view.dart';
 import 'package:transport_app/view/login/vehicle_documents_view.dart';
 import 'package:transport_app/view/menu/my_car_details_view.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/color_extension.dart';
 import '../../common/globs.dart';
 import '../../common/service_call.dart';
@@ -41,7 +42,7 @@ class _MyVehicleViewState extends State<MyVehicleView> {
           icon: Image.asset("./assets/images/back.png",width: 25,height: 25,),
         ),
         centerTitle: true,
-        title: Text("My Vehicle",
+        title: Text(AppLocalizations.of(context).translate('my_vehicle'),
           style: TextStyle(
               color: TColor.primaryText,
               fontSize: 18,
@@ -79,7 +80,7 @@ class _MyVehicleViewState extends State<MyVehicleView> {
                             backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,
                             icon: Icons.directions_car,
-                            label: 'Set',
+                            label: AppLocalizations.of(context).translate('set'),
                           ),
                           SlidableAction(
                             flex: 1,
@@ -89,7 +90,7 @@ class _MyVehicleViewState extends State<MyVehicleView> {
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
                             icon: Icons.delete,
-                            label: 'Delete',
+                            label: AppLocalizations.of(context).translate('delete'),
                           ),
                         ],
                       ),
@@ -101,7 +102,7 @@ class _MyVehicleViewState extends State<MyVehicleView> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-            child: RoundButton(title: "ADD A VEHICLE", onPressed: (){
+            child: RoundButton(title: AppLocalizations.of(context).translate('add_vehicle'), onPressed: (){
               context.push(const AddVehicleView());
             }),
           ),
@@ -133,7 +134,7 @@ class _MyVehicleViewState extends State<MyVehicleView> {
         },
         failure: (err) async{
           Globs.hideHUD();
-          mdShowAlert("Error", err,(){});
+          mdShowAlert(AppLocalizations.of(context).translate('error'), err,(){});
         }
     );
   }
@@ -149,9 +150,9 @@ class _MyVehicleViewState extends State<MyVehicleView> {
           Globs.hideHUD();
           carList.removeAt(deleteIndex);
           if((responseObj[KKey.status] as String? ?? "") == "1"){
-            mdShowAlert("Success", responseObj[KKey.message] as String? ?? "",(){});
+            mdShowAlert(AppLocalizations.of(context).translate('success'), responseObj[KKey.message] as String? ?? "",(){});
           }else{
-            mdShowAlert("Error", responseObj[KKey.message] as String? ?? "",(){});
+            mdShowAlert(AppLocalizations.of(context).translate('error'), responseObj[KKey.message] as String? ?? "",(){});
           }
           if(mounted){
             setState(() {
@@ -161,7 +162,7 @@ class _MyVehicleViewState extends State<MyVehicleView> {
         },
         failure: (err) async{
           Globs.hideHUD();
-          mdShowAlert("Error", err,(){});
+          mdShowAlert(AppLocalizations.of(context).translate('error'), err,(){});
         }
     );
   }
@@ -177,9 +178,9 @@ class _MyVehicleViewState extends State<MyVehicleView> {
           Globs.hideHUD();
           if((responseObj[KKey.status] as String? ?? "") == "1"){
             getCarList();
-            mdShowAlert("Success", responseObj[KKey.message] as String? ?? "",(){});
+            mdShowAlert(AppLocalizations.of(context).translate('success'), responseObj[KKey.message] as String? ?? "",(){});
           }else{
-            mdShowAlert("Error", responseObj[KKey.message] as String? ?? "",(){});
+            mdShowAlert(AppLocalizations.of(context).translate('error'), responseObj[KKey.message] as String? ?? "",(){});
           }
           if(mounted){
             setState(() {
@@ -189,7 +190,7 @@ class _MyVehicleViewState extends State<MyVehicleView> {
         },
         failure: (err) async{
           Globs.hideHUD();
-          mdShowAlert("Error", err,(){});
+          mdShowAlert(AppLocalizations.of(context).translate('error'), err,(){});
         }
     );
   }

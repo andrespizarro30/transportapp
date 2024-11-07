@@ -6,6 +6,7 @@ import 'package:transport_app/common_widget/title_subtiltle_cell.dart';
 import 'package:transport_app/view/menu/edit_profile_view.dart';
 import 'package:transport_app/view/menu/rating_view.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/color_extension.dart';
 
 class MyProfile extends StatefulWidget {
@@ -30,7 +31,7 @@ class _MyProfileState extends State<MyProfile> {
           icon: Image.asset("./assets/images/back.png",width: 25,height: 25,color: TColor.bg,),
         ),
         centerTitle: true,
-        title: Text("My Profile",
+        title: Text(AppLocalizations.of(context).translate('my_profile'),
           style: TextStyle(
               color: TColor.bg,
               fontSize: 18,
@@ -163,7 +164,7 @@ class _MyProfileState extends State<MyProfile> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 20),
               child: Text(
-                "PERSONAL INFO",
+                AppLocalizations.of(context).translate('personal_info'),
                 style: TextStyle(
                     color: TColor.primaryText,
                     fontSize: 15,

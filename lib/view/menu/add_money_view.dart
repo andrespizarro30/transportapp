@@ -4,6 +4,7 @@ import 'package:transport_app/common_widget/bank_row.dart';
 import 'package:transport_app/common_widget/round_button.dart';
 import 'package:transport_app/common_widget/tag_button.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/color_extension.dart';
 
 class AddMoneyView extends StatefulWidget {
@@ -36,7 +37,7 @@ class _AddMoneyViewState extends State<AddMoneyView> {
           icon: Image.asset("./assets/images/back.png",width: 25,height: 25,),
         ),
         centerTitle: true,
-        title: Text("Add money to wallet",
+        title: Text(AppLocalizations.of(context).translate('add_money_to_wallet'),
           style: TextStyle(
               color: TColor.primaryText,
               fontSize: 18,
@@ -59,7 +60,7 @@ class _AddMoneyViewState extends State<AddMoneyView> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Available Balance",
+                      Text(AppLocalizations.of(context).translate('available_balance'),
                         style: TextStyle(
                             color: TColor.secondaryText,
                             fontSize: 16
@@ -93,7 +94,7 @@ class _AddMoneyViewState extends State<AddMoneyView> {
                           decoration: InputDecoration(
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
-                              hintText: "Enter Add Wallet Amount",
+                              hintText: AppLocalizations.of(context).translate('enter_add_wallet_amount'),
                               hintStyle: TextStyle(color: TColor.placeholder, fontSize:  18,fontWeight: FontWeight.w800)
                           ),
                         ),
@@ -128,7 +129,7 @@ class _AddMoneyViewState extends State<AddMoneyView> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("From Bank Account",
+                      Text(AppLocalizations.of(context).translate('from_bank_account'),
                         style: TextStyle(
                             color: TColor.secondaryText,
                             fontSize: 16
@@ -164,7 +165,7 @@ class _AddMoneyViewState extends State<AddMoneyView> {
                 const SizedBox(height: 15,),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: RoundButton(title: "SUBMIT REQUEST", onPressed: (){}),
+                  child: RoundButton(title: AppLocalizations.of(context).translate('submit_request'), onPressed: (){}),
                 ),
                 const SizedBox(height: 15,),
               ]

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:transport_app/common_widget/price_list_view.dart';
 import 'package:fl_chart/fl_chart.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/color_extension.dart';
 
 class EarningView extends StatefulWidget {
@@ -63,7 +64,7 @@ class _EarningViewState extends State<EarningView> with SingleTickerProviderStat
           icon: Image.asset("./assets/images/back.png",width: 25,height: 25,),
         ),
         centerTitle: true,
-        title: Text("Earning",
+        title: Text(AppLocalizations.of(context).translate('earnings'),
           style: TextStyle(
               color: TColor.primaryText,
               fontSize: 18,
@@ -89,8 +90,8 @@ class _EarningViewState extends State<EarningView> with SingleTickerProviderStat
                   fontWeight: FontWeight.w800
               ),
               tabs: [
-                Tab(text: "TODAY",),
-                Tab(text: "WEEKLY",)
+                Tab(text: AppLocalizations.of(context).translate('today'),),
+                Tab(text: AppLocalizations.of(context).translate('weekly'),)
               ]
           ),
           Container(
@@ -192,25 +193,25 @@ class _EarningViewState extends State<EarningView> with SingleTickerProviderStat
                                       String weekDay;
                                       switch(group.x){
                                         case 0:
-                                          weekDay = "Sunday - ${rod.toY-1}";
+                                          weekDay = AppLocalizations.of(context).translate('sunday') + " - ${rod.toY-1}";
                                           break;
                                         case 1:
-                                          weekDay = "Lunes - ${rod.toY-1}";
+                                          weekDay = AppLocalizations.of(context).translate('monday') + " - ${rod.toY-1}";
                                           break;
                                         case 2:
-                                          weekDay = "Martes - ${rod.toY-1}";
+                                          weekDay = AppLocalizations.of(context).translate('tuesday') + " - ${rod.toY-1}";
                                           break;
                                         case 3:
-                                          weekDay = "Miercoles - ${rod.toY-1}";
+                                          weekDay = AppLocalizations.of(context).translate('wednesday') + " - ${rod.toY-1}";
                                           break;
                                         case 4:
-                                          weekDay = "Jueves - ${rod.toY-1}";
+                                          weekDay = AppLocalizations.of(context).translate('thursday') + " - ${rod.toY-1}";
                                           break;
                                         case 5:
-                                          weekDay = "Viernes - ${rod.toY-1}";
+                                          weekDay = AppLocalizations.of(context).translate('friday') + " - ${rod.toY-1}";
                                           break;
                                         case 6:
-                                          weekDay = "Sabado - ${rod.toY-1}";
+                                          weekDay = AppLocalizations.of(context).translate('saturday') + " - ${rod.toY-1}";
                                           break;
                                         default:
                                           throw Error();

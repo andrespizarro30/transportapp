@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:transport_app/common_widget/rating_row.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/color_extension.dart';
 
 class RatingView extends StatefulWidget {
@@ -51,7 +52,7 @@ class _RatingViewState extends State<RatingView> {
           icon: Image.asset("./assets/images/back.png",width: 25,height: 25,),
         ),
         centerTitle: true,
-        title: Text("Ratings",
+        title: Text(AppLocalizations.of(context).translate('ratings'),
           style: TextStyle(
               color: TColor.primaryText,
               fontSize: 18,
@@ -155,7 +156,7 @@ class _RatingViewState extends State<RatingView> {
                             ),
                           ),
                           Text(
-                            "Total trips",
+                            AppLocalizations.of(context).translate('total_trips'),
                             style: TextStyle(
                                 color: TColor.secondaryText,
                                 fontSize: 16                                ),

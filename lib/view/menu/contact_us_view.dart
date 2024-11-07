@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:transport_app/common/common_extension.dart';
 import 'package:transport_app/common_widget/line_text_field.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/color_extension.dart';
 import '../../common/globs.dart';
 import '../../common/service_call.dart';
@@ -34,7 +35,7 @@ class _ContactUsViewState extends State<ContactUsView> {
           icon: Image.asset("./assets/images/back.png",width: 25,height: 25,),
         ),
         centerTitle: true,
-        title: Text("Contact us",
+        title: Text(AppLocalizations.of(context).translate('contact_us'),
           style: TextStyle(
               color: TColor.primaryText,
               fontSize: 18,
@@ -49,32 +50,32 @@ class _ContactUsViewState extends State<ContactUsView> {
           child: Column(
             children: [
               LineTextField(
-                  title: "Name",
-                  hintText: "Enter name",
+                  title: AppLocalizations.of(context).translate('name'),
+                  hintText: AppLocalizations.of(context).translate('enter_name'),
                   controller: txtName,
                   keyboardType: TextInputType.text,
                   right: Icon(Icons.abc,size: 25,)
               ),
               const SizedBox(height: 15,),
               LineTextField(
-                  title: "E-mail",
-                  hintText: "Enter e-mail",
+                  title: AppLocalizations.of(context).translate('e_mail'),
+                  hintText: AppLocalizations.of(context).translate('enter_your_e_mail'),
                   controller: txtMail,
                   keyboardType: TextInputType.emailAddress,
                   right: Icon(Icons.email,size: 25,)
               ),
               const SizedBox(height: 15,),
               LineTextField(
-                  title: "Subject",
-                  hintText: "Enter subject",
+                  title: AppLocalizations.of(context).translate('subject'),
+                  hintText: AppLocalizations.of(context).translate('enter_subject'),
                   controller: txtSubject,
                   keyboardType: TextInputType.text,
                   right: Icon(Icons.subject,size: 25,)
               ),
               const SizedBox(height: 15,),
               LineTextField(
-                  title: "Message",
-                  hintText: "Enter message",
+                  title: AppLocalizations.of(context).translate('message'),
+                  hintText: AppLocalizations.of(context).translate('enter_message'),
                   controller: txtMessage,
                   keyboardType: TextInputType.text,
                   right: Icon(Icons.message,size: 25,),
@@ -82,7 +83,7 @@ class _ContactUsViewState extends State<ContactUsView> {
                   maxLines: 10,
               ),
               const SizedBox(height: 25,),
-              RoundButton(title: "Submit", onPressed: (){
+              RoundButton(title: AppLocalizations.of(context).translate('submit'), onPressed: (){
                 actionSubmit();
               })
             ],

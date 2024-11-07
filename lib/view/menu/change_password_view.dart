@@ -3,6 +3,7 @@ import 'package:transport_app/common/common_extension.dart';
 import 'package:transport_app/common_widget/line_text_field.dart';
 import 'package:transport_app/common_widget/round_button.dart';
 
+import '../../common/appLocalizations .dart';
 import '../../common/color_extension.dart';
 import '../../common/globs.dart';
 import '../../common/service_call.dart';
@@ -37,7 +38,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
           icon: Image.asset("./assets/images/back.png",width: 25,height: 25,),
         ),
         centerTitle: true,
-        title: Text("Change password",
+        title: Text(AppLocalizations.of(context).translate('change_password'),
           style: TextStyle(
               color: TColor.primaryText,
               fontSize: 18,
@@ -52,7 +53,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
           child: Column(
             children: [
               LineTextField(
-                  title: "Current password",
+                  title: AppLocalizations.of(context).translate('current_password'),
                   hintText: "******",
                   controller: txtCurrentPassword,
                   keyboardType: TextInputType.text,
@@ -66,7 +67,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
               ),
               SizedBox(height: 15,),
               LineTextField(
-                  title: "New password",
+                  title: AppLocalizations.of(context).translate('new_password'),
                   hintText: "******",
                   controller: txtNewPassword,
                   keyboardType: TextInputType.text,
@@ -80,7 +81,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
               ),
               SizedBox(height: 15,),
               LineTextField(
-                  title: "Confirm password",
+                  title: AppLocalizations.of(context).translate('confirm_password'),
                   hintText: "******",
                   controller: txtConfirmPassword,
                   keyboardType: TextInputType.text,
@@ -95,7 +96,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
 
               const SizedBox(height: 25,),
 
-              RoundButton(title: "Change", onPressed: (){
+              RoundButton(title: AppLocalizations.of(context).translate('change'), onPressed: (){
                 actionSubmit();
               })
 
@@ -109,17 +110,17 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
   void actionSubmit(){
 
     if(txtCurrentPassword.text.isEmpty){
-      mdShowAlert("error", "Please enter current password", () { });
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_enter_current_password'), () { });
       return;
     }
 
     if(txtNewPassword.text.isEmpty){
-      mdShowAlert("error", "Please enter new password", () { });
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('please_enter_new_password'), () { });
       return;
     }
 
     if(txtConfirmPassword.text != txtNewPassword.text){
-      mdShowAlert("error", "Password not match", () { });
+      mdShowAlert(AppLocalizations.of(context).translate('error'), AppLocalizations.of(context).translate('password_does_not_match'), () { });
       return;
     }
 
@@ -144,11 +145,11 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
         withSuccess: (responseObj) async{
           Globs.hideHUD();
           if((responseObj[KKey.status] as String? ?? "") == "1"){
-            mdShowAlert("Success", responseObj[KKey.message] as String? ?? "",(){
+            mdShowAlert(AppLocalizations.of(context).translate('success'), responseObj[KKey.message] as String? ?? "",(){
               context.pop();
             });
           }else{
-            mdShowAlert("Error", responseObj[KKey.message] as String? ?? "",(){});
+            mdShowAlert(AppLocalizations.of(context).translate('error'), responseObj[KKey.message] as String? ?? "",(){});
           }
           if(mounted){
             setState(() {
@@ -158,7 +159,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
         },
         failure: (err) async{
           Globs.hideHUD();
-          mdShowAlert("Error", err,(){});
+          mdShowAlert(AppLocalizations.of(context).translate('error'), err,(){});
         }
     );
   }
